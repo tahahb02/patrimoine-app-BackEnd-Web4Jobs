@@ -21,17 +21,24 @@ public class Equipment {
     private String center;
 
     @Column(nullable = false)
+    private String dateAdded;
 
-    private String dateAdded; // Utiliser String
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    // Constructeurs
+    @Column
+    private String imageUrl; // Champ pour stocker l'URL de l'image
+
+    // Constructeurs, getters et setters
     public Equipment() {}
 
-    public Equipment(String name, String category, String center, String dateAdded) {
+    public Equipment(String name, String category, String center, String dateAdded, String description, String imageUrl) {
         this.name = name;
         this.category = category;
         this.center = center;
         this.dateAdded = dateAdded;
+        this.description = description;
+        this.imageUrl = imageUrl;
     }
 
     // Getters et Setters
@@ -49,4 +56,10 @@ public class Equipment {
 
     public String getDateAdded() { return dateAdded; }
     public void setDateAdded(String dateAdded) { this.dateAdded = dateAdded; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

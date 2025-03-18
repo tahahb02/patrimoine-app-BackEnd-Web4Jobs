@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
-
 @Service
 public class EquipmentService {
 
@@ -21,9 +20,8 @@ public class EquipmentService {
     // ✅ Ajouter un équipement
     public Equipment addEquipment(Equipment equipment) {
         if (equipment.getDateAdded() == null) {
-            // Si la date n'est pas fournie, la générer automatiquement au format String
             DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-            equipment.setDateAdded(LocalDateTime.now().format(formatter)); // Format ISO pour la date
+            equipment.setDateAdded(LocalDateTime.now().format(formatter));
         }
         return equipmentRepository.save(equipment);
     }
@@ -44,6 +42,8 @@ public class EquipmentService {
             existingEquipment.setName(updatedEquipment.getName());
             existingEquipment.setCategory(updatedEquipment.getCategory());
             existingEquipment.setCenter(updatedEquipment.getCenter());
+            existingEquipment.setDescription(updatedEquipment.getDescription()); // Mettre à jour la description
+            existingEquipment.setImageUrl(updatedEquipment.getImageUrl()); // Mettre à jour l'URL de l'image
             return equipmentRepository.save(existingEquipment);
         });
     }

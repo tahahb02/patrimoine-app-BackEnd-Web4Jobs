@@ -1,9 +1,9 @@
-package com.patrimoine.backend.repository;
+    package com.patrimoine.backend.repository;
 
-import com.patrimoine.backend.entity.Equipment;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+    import com.patrimoine.backend.entity.Equipment;
+    import org.springframework.data.jpa.repository.JpaRepository;
+    import org.springframework.stereotype.Repository;
 
-@Repository
-public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
-}
+    @Repository
+    public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
+    }
