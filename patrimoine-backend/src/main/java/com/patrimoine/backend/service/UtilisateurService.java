@@ -20,4 +20,20 @@ public class UtilisateurService {
     public List<Utilisateur> getAllUtilisateurs() {
         return utilisateurRepository.findAll();
     }
+
+    public void deleteUtilisateur(Long id) {
+        utilisateurRepository.deleteById(id);
+    }
+
+    public Utilisateur updateUtilisateur(Long id, Utilisateur utilisateurDetails) {
+        Utilisateur utilisateur = utilisateurRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        utilisateur.setNom(utilisateurDetails.getNom());
+        utilisateur.setPrenom(utilisateurDetails.getPrenom());
+        utilisateur.setEmail(utilisateurDetails.getEmail());
+        utilisateur.setPassword(utilisateurDetails.getPassword());
+        utilisateur.setPhone(utilisateurDetails.getPhone());
+        utilisateur.setCity(utilisateurDetails.getCity());
+        utilisateur.setRole(utilisateurDetails.getRole());
+        return utilisateurRepository.save(utilisateur);
+    }
 }

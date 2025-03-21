@@ -13,7 +13,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Désactiver CSRF
                 .authorizeHttpRequests(authz -> authz
-                        .anyRequest().permitAll() // ⚠️ TEMPORAIRE : Autoriser tout
+                        .anyRequest().permitAll() // Autoriser tout
                 )
                 .formLogin(login -> login.disable()) // Désactiver le formulaire de login
                 .httpBasic(basic -> basic.disable()); // Désactiver l'authentification basique

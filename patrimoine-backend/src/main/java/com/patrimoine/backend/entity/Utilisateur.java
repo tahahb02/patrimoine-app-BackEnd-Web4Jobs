@@ -21,11 +21,10 @@ public class Utilisateur {
     private Role role = Role.ADHERANT;
 
     public enum Role {
-        ADHERANT, RESPONSABLE, DIRECTEUR;
+        ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN;
     }
 
-
-    // ✅ Constructeurs
+    // Constructeurs, getters, setters, et autres méthodes
     public Utilisateur() {}
 
     public Utilisateur(Long id, String nom, String prenom, String email, String password, String phone, String city, Role role) {
@@ -39,73 +38,25 @@ public class Utilisateur {
         this.role = role;
     }
 
-    // ✅ Getters
-    public Long getId() {
-        return id;
-    }
+    // Getters et setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
+    public String getPrenom() { return prenom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
-    public String getNom() {
-        return nom;
-    }
-
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    // ✅ Setters
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    // ✅ Méthode pour encoder le mot de passe
+    // Méthode pour encoder le mot de passe
     public void encodePassword() {
         if (this.password != null && !this.password.isEmpty() && !this.password.startsWith("$2a$")) {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -113,7 +64,6 @@ public class Utilisateur {
         }
     }
 
-    // ✅ Méthode toString (utile pour les logs)
     @Override
     public String toString() {
         return "Utilisateur{" +
