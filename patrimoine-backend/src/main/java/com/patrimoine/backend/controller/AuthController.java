@@ -17,20 +17,26 @@ public class AuthController {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginRequest) {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
+        // Vérifier si l'utilisateur existe
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email);
-
-        // Vérification du mot de passe
-        if (utilisateur == null || !passwordEncoder.matches(password, utilisateur.getPassword())) {
+        if (utilisateur == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Email ou mot de passe incorrect."));
         }
 
+        // Vérifier si le mot de passe correspond
+        if (!passwordEncoder.matches(password, utilisateur.getPassword())) {
+            return ResponseEntity.status(401).body(Map.of("message", "Email ou mot de passe incorrect."));
+        }
+
+        // Authentification réussie
         return ResponseEntity.ok(Map.of(
                 "message", "Connexion réussie",
                 "role", utilisateur.getRole(),
