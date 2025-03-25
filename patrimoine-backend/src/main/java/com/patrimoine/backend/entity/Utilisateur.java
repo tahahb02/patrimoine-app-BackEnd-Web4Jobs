@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
+@Table(name = "utilisateur")
 public class Utilisateur {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,6 +17,10 @@ public class Utilisateur {
     private String phone;
     private String city;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String profileImage;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.ADHERANT;
 
@@ -24,10 +28,10 @@ public class Utilisateur {
         ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN;
     }
 
-    // Constructeurs, getters, setters, et autres méthodes
     public Utilisateur() {}
 
-    public Utilisateur(Long id, String nom, String prenom, String email, String password, String phone, String city, Role role) {
+    public Utilisateur(Long id, String nom, String prenom, String email, String password,
+                       String phone, String city, Role role, String profileImage) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
@@ -36,6 +40,7 @@ public class Utilisateur {
         this.phone = phone;
         this.city = city;
         this.role = role;
+        this.profileImage = profileImage;
     }
 
     // Getters et setters
@@ -55,26 +60,13 @@ public class Utilisateur {
     public void setCity(String city) { this.city = city; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+    public String getProfileImage() { return profileImage; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
 
-    // Méthode pour encoder le mot de passe
     public void encodePassword() {
         if (this.password != null && !this.password.isEmpty() && !this.password.startsWith("$2a$")) {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             this.password = encoder.encode(this.password);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Utilisateur{" +
-                "id=" + id +
-                ", nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", phone='" + phone + '\'' +
-                ", city='" + city + '\'' +
-                ", role=" + role +
-                '}';
     }
 }

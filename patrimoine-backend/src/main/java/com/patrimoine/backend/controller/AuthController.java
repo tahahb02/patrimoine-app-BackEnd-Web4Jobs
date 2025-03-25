@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")  // Permet les requêtes CORS depuis React
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -25,23 +25,25 @@ public class AuthController {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
-        // Vérifier si l'utilisateur existe
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email);
         if (utilisateur == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Email ou mot de passe incorrect."));
         }
 
-        // Vérifier si le mot de passe correspond
         if (!passwordEncoder.matches(password, utilisateur.getPassword())) {
             return ResponseEntity.status(401).body(Map.of("message", "Email ou mot de passe incorrect."));
         }
 
-        // Authentification réussie
+        // Retourner toutes les infos nécessaires pour le frontend
         return ResponseEntity.ok(Map.of(
                 "message", "Connexion réussie",
                 "role", utilisateur.getRole(),
                 "id", utilisateur.getId(),
-                "email", utilisateur.getEmail()
+                "email", utilisateur.getEmail(),
+                "nom", utilisateur.getNom(),
+                "prenom", utilisateur.getPrenom(),
+                "phone", utilisateur.getPhone(),
+                "city", utilisateur.getCity()
         ));
     }
 }
