@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -20,6 +21,28 @@ public class UtilisateurController {
     @Autowired
     private UtilisateurService utilisateurService;
 
+    // Nouveau endpoint pour récupérer tous les utilisateurs
+    @GetMapping
+    public ResponseEntity<List<Utilisateur>> getAllUtilisateurs() {
+        List<Utilisateur> utilisateurs = utilisateurService.getAllUtilisateurs();
+        return ResponseEntity.ok(utilisateurs);
+    }
+
+    // Nouveau endpoint pour créer un utilisateur
+    @PostMapping
+    public ResponseEntity<Utilisateur> createUtilisateur(@RequestBody Utilisateur utilisateur) {
+        Utilisateur savedUtilisateur = utilisateurService.saveUtilisateur(utilisateur);
+        return new ResponseEntity<>(savedUtilisateur, HttpStatus.CREATED);
+    }
+
+    // Nouveau endpoint pour supprimer un utilisateur
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUtilisateur(@PathVariable Long id) {
+        utilisateurService.deleteUtilisateur(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Les méthodes existantes (ne pas modifier)
     @GetMapping("/{id}")
     public ResponseEntity<Utilisateur> getUtilisateurById(@PathVariable Long id) {
         Utilisateur utilisateur = utilisateurService.getUtilisateurById(id);
@@ -38,17 +61,13 @@ public class UtilisateurController {
     public ResponseEntity<String> uploadPhotoProfil(
             @PathVariable Long id,
             @RequestParam("photo") MultipartFile photo) {
-
         try {
             if (photo.isEmpty()) {
                 return ResponseEntity.badRequest().body("Aucune photo fournie");
             }
-
-            // Vérification de la taille (2MB max)
             if (photo.getSize() > 2_000_000) {
                 return ResponseEntity.badRequest().body("La taille de l'image ne doit pas dépasser 2MB");
             }
-
             String imageBase64 = Base64.getEncoder().encodeToString(photo.getBytes());
             utilisateurService.updateProfileImage(id, imageBase64);
             return ResponseEntity.ok("Photo mise à jour avec succès");
