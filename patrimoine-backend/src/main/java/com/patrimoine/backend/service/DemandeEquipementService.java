@@ -14,8 +14,17 @@ public class DemandeEquipementService {
     private DemandeEquipementRepository demandeEquipementRepository;
 
     public DemandeEquipement creerDemande(DemandeEquipement demande) {
-        demande.setStatut("EN_ATTENTE"); // Par défaut, la demande est en attente
+        if (demande.getDateDebut() == null || demande.getDateFin() == null
+                || demande.getDateDebut().isAfter(demande.getDateFin())) {
+            throw new IllegalArgumentException("Les dates de réservation sont invalides");
+        }
+
+        demande.setStatut("EN_ATTENTE");
         return demandeEquipementRepository.save(demande);
+    }
+
+    public List<DemandeEquipement> getDemandesByUtilisateur(Long userId) {
+        return demandeEquipementRepository.findByUtilisateurId(userId);
     }
 
     public List<DemandeEquipement> filtrerDemandes(String nom, String prenom, String centre) {
