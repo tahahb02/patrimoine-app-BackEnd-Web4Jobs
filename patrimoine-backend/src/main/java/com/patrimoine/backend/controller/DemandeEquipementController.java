@@ -37,7 +37,13 @@ public class DemandeEquipementController {
         demande.setNom(utilisateur.getNom());
         demande.setPrenom(utilisateur.getPrenom());
         demande.setNumeroTelephone(utilisateur.getPhone());
-        demande.setUtilisateur(utilisateur); // Cela va définir utilisateur_id
+
+        // Vérification que l'utilisateur est bien un adhérent
+        if (utilisateur.getRole() != Utilisateur.Role.ADHERANT) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Seuls les adhérents peuvent faire des demandes");
+        }
+
+        demande.setUtilisateur(utilisateur);
 
         try {
             DemandeEquipement savedDemande = demandeEquipementService.creerDemande(demande);
@@ -46,7 +52,6 @@ public class DemandeEquipementController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping("/utilisateur/{userId}")
     public ResponseEntity<List<DemandeEquipement>> getDemandesByUser(@PathVariable Long userId) {
         List<DemandeEquipement> demandes = demandeEquipementService.getDemandesByUtilisateur(userId);

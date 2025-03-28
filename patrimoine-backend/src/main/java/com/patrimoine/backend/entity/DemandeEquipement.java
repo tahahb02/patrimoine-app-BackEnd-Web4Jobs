@@ -47,8 +47,9 @@ public class DemandeEquipement {
     @Column(name = "commentaire_responsable", columnDefinition = "TEXT")
     private String commentaireResponsable;
 
+
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
+    @JoinColumn(name = "adherant_id") // Modification ici pour correspondre à la base de données
     private Utilisateur utilisateur;
 
     // Getters et Setters
