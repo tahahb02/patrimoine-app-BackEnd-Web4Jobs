@@ -27,6 +27,14 @@ public class DemandeEquipementService {
         return demandeEquipementRepository.findByUtilisateurId(userId);
     }
 
+    public List<DemandeEquipement> getDemandesEnAttente() {
+        return demandeEquipementRepository.findByStatut("EN_ATTENTE");
+    }
+
+    public List<DemandeEquipement> getHistoriqueDemandes() {
+        return demandeEquipementRepository.findByStatutNot("EN_ATTENTE");
+    }
+
     public List<DemandeEquipement> filtrerDemandes(String nom, String prenom, String centre) {
         return demandeEquipementRepository.filtrerDemandes(nom, prenom, centre);
     }

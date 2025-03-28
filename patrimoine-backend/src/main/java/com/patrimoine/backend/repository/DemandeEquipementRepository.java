@@ -11,6 +11,10 @@ public interface DemandeEquipementRepository extends JpaRepository<DemandeEquipe
 
     List<DemandeEquipement> findByUtilisateurId(Long utilisateurId);
 
+    List<DemandeEquipement> findByStatut(String statut);
+
+    List<DemandeEquipement> findByStatutNot(String statut);
+
     @Query("SELECT d FROM DemandeEquipement d WHERE " +
             "(:nom IS NULL OR d.nom LIKE %:nom%) AND " +
             "(:prenom IS NULL OR d.prenom LIKE %:prenom%) AND " +

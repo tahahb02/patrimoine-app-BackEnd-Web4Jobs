@@ -37,7 +37,7 @@ public class DemandeEquipementController {
         demande.setNom(utilisateur.getNom());
         demande.setPrenom(utilisateur.getPrenom());
         demande.setNumeroTelephone(utilisateur.getPhone());
-        demande.setUtilisateur(utilisateur);
+        demande.setUtilisateur(utilisateur); // Cela va définir utilisateur_id
 
         try {
             DemandeEquipement savedDemande = demandeEquipementService.creerDemande(demande);
@@ -53,6 +53,18 @@ public class DemandeEquipementController {
         return ResponseEntity.ok(demandes);
     }
 
+    @GetMapping("/en-attente")
+    public ResponseEntity<List<DemandeEquipement>> getDemandesEnAttente() {
+        List<DemandeEquipement> demandes = demandeEquipementService.getDemandesEnAttente();
+        return ResponseEntity.ok(demandes);
+    }
+
+    @GetMapping("/historique")
+    public ResponseEntity<List<DemandeEquipement>> getHistoriqueDemandes() {
+        List<DemandeEquipement> demandes = demandeEquipementService.getHistoriqueDemandes();
+        return ResponseEntity.ok(demandes);
+    }
+
     @GetMapping("/filtrer")
     public List<DemandeEquipement> filtrerDemandes(
             @RequestParam(required = false) String nom,
@@ -62,11 +74,16 @@ public class DemandeEquipementController {
     }
 
     @PutMapping("/{id}/statut")
-    public DemandeEquipement mettreAJourStatut(
+    public ResponseEntity<?> mettreAJourStatut(
             @PathVariable Long id,
-            @RequestBody Map<String, String> requestBody) {
-        String statut = requestBody.get("statut");
-        String commentaire = requestBody.get("commentaire");
-        return demandeEquipementService.mettreAJourStatut(id, statut, commentaire);
+            @RequestBody Map<String, String> request) {
+        try {
+            String statut = request.get("statut");
+            String commentaire = request.get("commentaire");
+            DemandeEquipement updated = demandeEquipementService.mettreAJourStatut(id, statut, commentaire);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
