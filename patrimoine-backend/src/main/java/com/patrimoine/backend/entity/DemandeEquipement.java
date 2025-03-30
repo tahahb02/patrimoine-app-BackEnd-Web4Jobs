@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "demandes_equipement")
 public class DemandeEquipement {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,12 +46,17 @@ public class DemandeEquipement {
     @Column(name = "commentaire_responsable", columnDefinition = "TEXT")
     private String commentaireResponsable;
 
+    @Column(name = "date_demande", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime dateDemande = LocalDateTime.now();
+
+    @Column(name = "date_reponse")
+    private LocalDateTime dateReponse;
 
     @ManyToOne
-    @JoinColumn(name = "adherant_id") // Modification ici pour correspondre à la base de données
+    @JoinColumn(name = "adherant_id")
     private Utilisateur utilisateur;
 
-    // Getters et Setters
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getIdEquipement() { return idEquipement; }
@@ -79,6 +83,10 @@ public class DemandeEquipement {
     public void setStatut(String statut) { this.statut = statut; }
     public String getCommentaireResponsable() { return commentaireResponsable; }
     public void setCommentaireResponsable(String commentaireResponsable) { this.commentaireResponsable = commentaireResponsable; }
+    public LocalDateTime getDateDemande() { return dateDemande; }
+    public void setDateDemande(LocalDateTime dateDemande) { this.dateDemande = dateDemande; }
+    public LocalDateTime getDateReponse() { return dateReponse; }
+    public void setDateReponse(LocalDateTime dateReponse) { this.dateReponse = dateReponse; }
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
 }

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -37,12 +38,7 @@ public class DemandeEquipementController {
         demande.setNom(utilisateur.getNom());
         demande.setPrenom(utilisateur.getPrenom());
         demande.setNumeroTelephone(utilisateur.getPhone());
-
-        // Vérification que l'utilisateur est bien un adhérent
-        if (utilisateur.getRole() != Utilisateur.Role.ADHERANT) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Seuls les adhérents peuvent faire des demandes");
-        }
-
+        demande.setDateDemande(LocalDateTime.now());
         demande.setUtilisateur(utilisateur);
 
         try {
