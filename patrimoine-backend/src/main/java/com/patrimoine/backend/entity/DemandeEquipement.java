@@ -40,13 +40,16 @@ public class DemandeEquipement {
     @Column(name = "remarques", columnDefinition = "TEXT")
     private String remarques;
 
+    @Column(name = "urgence", nullable = false)
+    private String urgence = "MOYENNE";
+
     @Column(name = "statut")
     private String statut = "EN_ATTENTE";
 
     @Column(name = "commentaire_responsable", columnDefinition = "TEXT")
     private String commentaireResponsable;
 
-    @Column(name = "date_demande", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "date_demande", nullable = false)
     private LocalDateTime dateDemande = LocalDateTime.now();
 
     @Column(name = "date_reponse")
@@ -79,6 +82,8 @@ public class DemandeEquipement {
     public void setDateFin(LocalDateTime dateFin) { this.dateFin = dateFin; }
     public String getRemarques() { return remarques; }
     public void setRemarques(String remarques) { this.remarques = remarques; }
+    public String getUrgence() { return urgence; }
+    public void setUrgence(String urgence) { this.urgence = urgence; }
     public String getStatut() { return statut; }
     public void setStatut(String statut) { this.statut = statut; }
     public String getCommentaireResponsable() { return commentaireResponsable; }
@@ -89,4 +94,12 @@ public class DemandeEquipement {
     public void setDateReponse(LocalDateTime dateReponse) { this.dateReponse = dateReponse; }
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
+
+    public boolean isUrgenceElevee() {
+        return "ELEVEE".equals(this.urgence);
+    }
+
+    public boolean isEnRetard() {
+        return LocalDateTime.now().isAfter(this.dateFin) && "EN_ATTENTE".equals(this.statut);
+    }
 }

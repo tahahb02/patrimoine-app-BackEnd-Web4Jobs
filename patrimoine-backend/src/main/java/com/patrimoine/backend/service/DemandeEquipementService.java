@@ -4,7 +4,6 @@ import com.patrimoine.backend.entity.DemandeEquipement;
 import com.patrimoine.backend.repository.DemandeEquipementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,12 +14,9 @@ public class DemandeEquipementService {
     private DemandeEquipementRepository demandeEquipementRepository;
 
     public DemandeEquipement creerDemande(DemandeEquipement demande) {
-        if (demande.getDateDebut() == null || demande.getDateFin() == null
-                || demande.getDateDebut().isAfter(demande.getDateFin())) {
-            throw new IllegalArgumentException("Les dates de réservation sont invalides");
+        if (demande.getDateDebut().isAfter(demande.getDateFin())) {
+            throw new IllegalArgumentException("La date de fin doit être postérieure à la date de début");
         }
-
-        demande.setStatut("EN_ATTENTE");
         return demandeEquipementRepository.save(demande);
     }
 
@@ -36,23 +32,21 @@ public class DemandeEquipementService {
         return demandeEquipementRepository.findByStatutNot("EN_ATTENTE");
     }
 
-    public List<DemandeEquipement> filtrerDemandes(String nom, String prenom, String centre) {
-        return demandeEquipementRepository.filtrerDemandes(nom, prenom, centre);
+    public List<DemandeEquipement> getDemandesUrgentes() {
+        return demandeEquipementRepository.findDemandesUrgentes();
     }
 
-
+    public List<DemandeEquipement> getDemandesEnRetard() {
+        return demandeEquipementRepository.findDemandesEnRetard();
+    }
 
     public DemandeEquipement mettreAJourStatut(Long id, String statut, String commentaire) {
         DemandeEquipement demande = demandeEquipementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+                .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée"));
 
         demande.setStatut(statut);
         demande.setCommentaireResponsable(commentaire);
-
-        // Enregistrer la date de réponse seulement si ce n'est pas déjà fait
-        if (demande.getDateReponse() == null && !"EN_ATTENTE".equals(statut)) {
-            demande.setDateReponse(LocalDateTime.now());
-        }
+        demande.setDateReponse(LocalDateTime.now());
 
         return demandeEquipementRepository.save(demande);
     }

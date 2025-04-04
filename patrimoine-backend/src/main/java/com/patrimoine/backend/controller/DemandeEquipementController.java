@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,10 @@ public class DemandeEquipementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
         }
 
-        // Remplir automatiquement les infos utilisateur
+        if (demande.getUrgence() == null || !List.of("NORMALE", "MOYENNE", "ELEVEE").contains(demande.getUrgence())) {
+            demande.setUrgence("MOYENNE");
+        }
+
         demande.setNom(utilisateur.getNom());
         demande.setPrenom(utilisateur.getPrenom());
         demande.setNumeroTelephone(utilisateur.getPhone());
@@ -48,6 +50,7 @@ public class DemandeEquipementController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/utilisateur/{userId}")
     public ResponseEntity<List<DemandeEquipement>> getDemandesByUser(@PathVariable Long userId) {
         List<DemandeEquipement> demandes = demandeEquipementService.getDemandesByUtilisateur(userId);
@@ -66,12 +69,16 @@ public class DemandeEquipementController {
         return ResponseEntity.ok(demandes);
     }
 
-    @GetMapping("/filtrer")
-    public List<DemandeEquipement> filtrerDemandes(
-            @RequestParam(required = false) String nom,
-            @RequestParam(required = false) String prenom,
-            @RequestParam(required = false) String centre) {
-        return demandeEquipementService.filtrerDemandes(nom, prenom, centre);
+    @GetMapping("/urgentes")
+    public ResponseEntity<List<DemandeEquipement>> getDemandesUrgentes() {
+        List<DemandeEquipement> demandes = demandeEquipementService.getDemandesUrgentes();
+        return ResponseEntity.ok(demandes);
+    }
+
+    @GetMapping("/en-retard")
+    public ResponseEntity<List<DemandeEquipement>> getDemandesEnRetard() {
+        List<DemandeEquipement> demandes = demandeEquipementService.getDemandesEnRetard();
+        return ResponseEntity.ok(demandes);
     }
 
     @PutMapping("/{id}/statut")
