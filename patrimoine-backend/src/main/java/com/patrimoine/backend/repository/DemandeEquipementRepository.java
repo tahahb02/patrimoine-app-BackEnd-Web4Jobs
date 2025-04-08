@@ -15,4 +15,13 @@ public interface DemandeEquipementRepository extends JpaRepository<DemandeEquipe
 
     @Query("SELECT d FROM DemandeEquipement d WHERE d.dateFin < CURRENT_TIMESTAMP AND d.statut = 'EN_ATTENTE'")
     List<DemandeEquipement> findDemandesEnRetard();
+
+    @Query("SELECT d FROM DemandeEquipement d WHERE d.idEquipement = :equipementId AND d.statut = 'ACCEPTEE'")
+    List<DemandeEquipement> findDemandesAccepteesParEquipement(String equipementId);
+
+    @Query("SELECT d.utilisateur, SUM(d.dureeUtilisation) as totalHeures " +
+            "FROM DemandeEquipement d " +
+            "WHERE d.idEquipement = :equipementId AND d.statut = 'ACCEPTEE' " +
+            "GROUP BY d.utilisateur")
+    List<Object[]> findUtilisationParAdherant(String equipementId);
 }

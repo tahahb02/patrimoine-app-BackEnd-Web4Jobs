@@ -2,6 +2,7 @@ package com.patrimoine.backend.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.Duration;
 
 @Entity
 @Table(name = "demandes_equipement")
@@ -55,6 +56,9 @@ public class DemandeEquipement {
     @Column(name = "date_reponse")
     private LocalDateTime dateReponse;
 
+    @Column(name = "duree_utilisation")
+    private Long dureeUtilisation;
+
     @ManyToOne
     @JoinColumn(name = "adherant_id")
     private Utilisateur utilisateur;
@@ -92,8 +96,18 @@ public class DemandeEquipement {
     public void setDateDemande(LocalDateTime dateDemande) { this.dateDemande = dateDemande; }
     public LocalDateTime getDateReponse() { return dateReponse; }
     public void setDateReponse(LocalDateTime dateReponse) { this.dateReponse = dateReponse; }
+    public Long getDureeUtilisation() { return dureeUtilisation; }
+    public void setDureeUtilisation(Long dureeUtilisation) { this.dureeUtilisation = dureeUtilisation; }
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
+
+    @PreUpdate
+    @PrePersist
+    public void calculerDuree() {
+        if (this.dateDebut != null && this.dateFin != null) {
+            this.dureeUtilisation = Duration.between(this.dateDebut, this.dateFin).toHours();
+        }
+    }
 
     public boolean isUrgenceElevee() {
         return "ELEVEE".equals(this.urgence);

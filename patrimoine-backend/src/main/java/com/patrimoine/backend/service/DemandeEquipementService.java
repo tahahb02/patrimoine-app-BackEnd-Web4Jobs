@@ -1,11 +1,15 @@
 package com.patrimoine.backend.service;
 
 import com.patrimoine.backend.entity.DemandeEquipement;
+import com.patrimoine.backend.entity.Utilisateur;
 import com.patrimoine.backend.repository.DemandeEquipementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class DemandeEquipementService {
@@ -49,5 +53,35 @@ public class DemandeEquipementService {
         demande.setDateReponse(LocalDateTime.now());
 
         return demandeEquipementRepository.save(demande);
+    }
+
+    public List<DemandeEquipement> getHistoriqueUtilisationEquipement(String equipementId) {
+        return demandeEquipementRepository.findDemandesAccepteesParEquipement(equipementId);
+    }
+
+    public Map<String, Object> getStatistiquesUtilisationEquipement(String equipementId) {
+        List<Object[]> resultats = demandeEquipementRepository.findUtilisationParAdherant(equipementId);
+
+        Map<String, Object> statistiques = new HashMap<>();
+        List<Map<String, Object>> utilisations = resultats.stream()
+                .map(r -> {
+                    Utilisateur user = (Utilisateur) r[0];
+                    Long heures = (Long) r[1];
+
+                    Map<String, Object> utilisation = new HashMap<>();
+                    utilisation.put("nom", user.getNom());
+                    utilisation.put("prenom", user.getPrenom());
+                    utilisation.put("email", user.getEmail());
+                    utilisation.put("telephone", user.getPhone());
+                    utilisation.put("heuresUtilisation", heures);
+
+                    return utilisation;
+                })
+                .collect(Collectors.toList());
+
+        statistiques.put("utilisations", utilisations);
+        statistiques.put("totalUtilisations", resultats.size());
+
+        return statistiques;
     }
 }
