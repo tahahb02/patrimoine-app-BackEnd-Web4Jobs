@@ -5,7 +5,10 @@ import com.patrimoine.backend.entity.Utilisateur;
 import com.patrimoine.backend.repository.DemandeEquipementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -83,5 +86,41 @@ public class DemandeEquipementService {
         statistiques.put("totalUtilisations", resultats.size());
 
         return statistiques;
+    }
+
+    public List<DemandeEquipement> getDemandesLivraisonAujourdhui() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        return demandeEquipementRepository.findByDateDebutBetweenAndStatut(
+                startOfDay, endOfDay, "ACCEPTEE");
+    }
+
+    public List<DemandeEquipement> getDemandesRetourAujourdhui() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        return demandeEquipementRepository.findByDateFinBetweenAndStatut(
+                startOfDay, endOfDay, "ACCEPTEE");
+    }
+
+    public DemandeEquipement validerLivraison(Long id) {
+        DemandeEquipement demande = demandeEquipementRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée"));
+
+        demande.setStatut("LIVREE");
+        return demandeEquipementRepository.save(demande);
+    }
+
+    public DemandeEquipement validerRetour(Long id) {
+        DemandeEquipement demande = demandeEquipementRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée"));
+
+        demande.setStatut("RETOURNEE");
+        return demandeEquipementRepository.save(demande);
+
+        // Ici vous pourriez ajouter l'envoi du feedback
     }
 }

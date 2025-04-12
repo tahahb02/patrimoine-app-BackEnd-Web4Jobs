@@ -94,4 +94,36 @@ public class DemandeEquipementController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @GetMapping("/livraisons-aujourdhui")
+    public ResponseEntity<List<DemandeEquipement>> getDemandesLivraisonAujourdhui() {
+        List<DemandeEquipement> demandes = demandeEquipementService.getDemandesLivraisonAujourdhui();
+        return ResponseEntity.ok(demandes);
+    }
+
+    @GetMapping("/retours-aujourdhui")
+    public ResponseEntity<List<DemandeEquipement>> getDemandesRetourAujourdhui() {
+        List<DemandeEquipement> demandes = demandeEquipementService.getDemandesRetourAujourdhui();
+        return ResponseEntity.ok(demandes);
+    }
+
+    @PostMapping("/{id}/valider-livraison")
+    public ResponseEntity<?> validerLivraison(@PathVariable Long id) {
+        try {
+            DemandeEquipement updated = demandeEquipementService.validerLivraison(id);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/valider-retour")
+    public ResponseEntity<?> validerRetour(@PathVariable Long id) {
+        try {
+            DemandeEquipement updated = demandeEquipementService.validerRetour(id);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
