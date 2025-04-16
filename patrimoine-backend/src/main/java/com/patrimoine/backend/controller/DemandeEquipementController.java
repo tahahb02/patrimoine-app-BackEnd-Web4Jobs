@@ -37,11 +37,21 @@ public class DemandeEquipementController {
             demande.setUrgence("MOYENNE");
         }
 
+        // Définir les valeurs automatiques
         demande.setNom(utilisateur.getNom());
         demande.setPrenom(utilisateur.getPrenom());
         demande.setNumeroTelephone(utilisateur.getPhone());
         demande.setDateDemande(LocalDateTime.now());
         demande.setUtilisateur(utilisateur);
+
+        // Définir la ville du centre (vous pouvez adapter cette logique selon vos besoins)
+        if (demande.getVilleCentre() == null) {
+            // Option 1: Utiliser la ville de l'utilisateur si disponible
+            // demande.setVilleCentre(utilisateur.getVille());
+
+            // Option 2: Utiliser une valeur par défaut
+            demande.setVilleCentre("Paris"); // Remplacez par votre valeur par défaut
+        }
 
         try {
             DemandeEquipement savedDemande = demandeEquipementService.creerDemande(demande);
@@ -51,6 +61,7 @@ public class DemandeEquipementController {
         }
     }
 
+    // Les autres méthodes restent inchangées
     @GetMapping("/utilisateur/{userId}")
     public ResponseEntity<List<DemandeEquipement>> getDemandesByUser(@PathVariable Long userId) {
         List<DemandeEquipement> demandes = demandeEquipementService.getDemandesByUtilisateur(userId);

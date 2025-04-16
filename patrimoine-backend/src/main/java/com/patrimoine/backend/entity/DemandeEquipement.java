@@ -23,6 +23,9 @@ public class DemandeEquipement {
     @Column(name = "centre_equipement", nullable = false)
     private String centreEquipement;
 
+    @Column(name = "ville_centre", nullable = false)
+    private String villeCentre;
+
     @Column(name = "prenom", nullable = false)
     private String prenom;
 
@@ -74,6 +77,8 @@ public class DemandeEquipement {
     public void setCategorieEquipement(String categorieEquipement) { this.categorieEquipement = categorieEquipement; }
     public String getCentreEquipement() { return centreEquipement; }
     public void setCentreEquipement(String centreEquipement) { this.centreEquipement = centreEquipement; }
+    public String getVilleCentre() { return villeCentre; }
+    public void setVilleCentre(String villeCentre) { this.villeCentre = villeCentre; }
     public String getPrenom() { return prenom; }
     public void setPrenom(String prenom) { this.prenom = prenom; }
     public String getNom() { return nom; }
