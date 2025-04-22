@@ -28,8 +28,24 @@ public class UtilisateurService {
         return utilisateurRepository.findAll();
     }
 
+    public List<Utilisateur> getUtilisateursByVilleCentre(Utilisateur.VilleCentre villeCentre) {
+            return utilisateurRepository.findByVilleCentre(villeCentre);
+    }
+
+    public List<Utilisateur> getUtilisateursByRoleAndVilleCentre(Utilisateur.Role role, Utilisateur.VilleCentre villeCentre) {
+        return utilisateurRepository.findByRoleAndVilleCentre(role, villeCentre);
+    }
+
+    public List<Utilisateur> getUtilisateursByRole(Utilisateur.Role role) {
+        return utilisateurRepository.findByRole(role);
+    }
+
     public void deleteUtilisateur(Long id) {
         utilisateurRepository.deleteById(id);
+    }
+
+    public Utilisateur getUtilisateurById(Long id) {
+        return utilisateurRepository.findById(id).orElse(null);
     }
 
     public Utilisateur updateUtilisateur(Long id, Utilisateur utilisateurDetails) {
@@ -40,19 +56,16 @@ public class UtilisateurService {
                     utilisateur.setEmail(utilisateurDetails.getEmail());
                     utilisateur.setPhone(utilisateurDetails.getPhone());
                     utilisateur.setCity(utilisateurDetails.getCity());
+                    utilisateur.setVilleCentre(utilisateurDetails.getVilleCentre());
                     utilisateur.setRole(utilisateurDetails.getRole());
 
-                    if (utilisateurDetails.getPassword() != null) {
+                    if (utilisateurDetails.getPassword() != null && !utilisateurDetails.getPassword().isEmpty()) {
                         utilisateur.setPassword(passwordEncoder.encode(utilisateurDetails.getPassword()));
                     }
 
                     return utilisateurRepository.save(utilisateur);
                 })
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-    }
-
-    public Utilisateur getUtilisateurById(Long id) {
-        return utilisateurRepository.findById(id).orElse(null);
     }
 
     public Utilisateur updateProfileImage(Long id, String imageBase64) {

@@ -34,7 +34,6 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("message", "Email ou mot de passe incorrect."));
         }
 
-        // Retourner toutes les infos nécessaires pour le frontend
         return ResponseEntity.ok(Map.of(
                 "message", "Connexion réussie",
                 "role", utilisateur.getRole(),
@@ -43,7 +42,8 @@ public class AuthController {
                 "nom", utilisateur.getNom(),
                 "prenom", utilisateur.getPrenom(),
                 "phone", utilisateur.getPhone(),
-                "city", utilisateur.getCity()
+                "city", utilisateur.getCity(),
+                "villeCentre", utilisateur.getVilleCentre()
         ));
     }
 }

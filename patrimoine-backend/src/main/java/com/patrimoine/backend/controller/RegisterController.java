@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")  // Permet les requêtes CORS depuis le frontend
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/register")
 public class RegisterController {
 
@@ -20,10 +20,9 @@ public class RegisterController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String phone,
-            @RequestParam String city)
+            @RequestParam String city,
+            @RequestParam Utilisateur.VilleCentre villeCentre) {
 
-    {
-    
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setNom(nom);
         utilisateur.setPrenom(prenom);
@@ -31,15 +30,11 @@ public class RegisterController {
         utilisateur.setPassword(password);
         utilisateur.setPhone(phone);
         utilisateur.setCity(city);
+        utilisateur.setVilleCentre(villeCentre);
+        utilisateur.setRole(Utilisateur.Role.ADHERANT);
 
-
-        System.out.println("Utilisateur reçu dans le contrôleur: " + utilisateur); // Log de l'utilisateur reçu
-        utilisateur.encodePassword();  // Assurez-vous que le mot de passe est bien encodé
-
-        // Vérification des champs avant la sauvegarde
-        System.out.println("Avant sauvegarde : " + utilisateur);
-
-        return utilisateurService.saveUtilisateur(utilisateur);  // Sauvegarde de l'utilisateur
+        utilisateur.encodePassword();
+        return utilisateurService.saveUtilisateur(utilisateur);
     }
 
 

@@ -17,6 +17,10 @@ public class Utilisateur {
     private String phone;
     private String city;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ville_centre")
+    private VilleCentre villeCentre;
+
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String profileImage;
@@ -25,25 +29,21 @@ public class Utilisateur {
     private Role role = Role.ADHERANT;
 
     public enum Role {
-        ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN;
+        ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN
+    }
+
+    public enum VilleCentre {
+        TINGHIR, TEMARA, ESSAOUIRA, DAKHLA, LAAYOUNE, NADOR, AIN_EL_AOUDA;
+
+        @Override
+        public String toString() {
+            return this.name().charAt(0) + this.name().substring(1).toLowerCase().replace("_", " ");
+        }
     }
 
     public Utilisateur() {}
 
-    public Utilisateur(Long id, String nom, String prenom, String email, String password,
-                       String phone, String city, Role role, String profileImage) {
-        this.id = id;
-        this.nom = nom;
-        this.prenom = prenom;
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
-        this.city = city;
-        this.role = role;
-        this.profileImage = profileImage;
-    }
-
-    // Getters et setters
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNom() { return nom; }
@@ -58,6 +58,8 @@ public class Utilisateur {
     public void setPhone(String phone) { this.phone = phone; }
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
+    public VilleCentre getVilleCentre() { return villeCentre; }
+    public void setVilleCentre(VilleCentre villeCentre) { this.villeCentre = villeCentre; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
     public String getProfileImage() { return profileImage; }
