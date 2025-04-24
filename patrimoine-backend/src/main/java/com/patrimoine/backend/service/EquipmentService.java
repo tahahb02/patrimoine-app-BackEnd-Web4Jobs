@@ -38,7 +38,6 @@ public class EquipmentService {
         return equipmentRepository.findById(id).map(existingEquipment -> {
             existingEquipment.setName(updatedEquipment.getName());
             existingEquipment.setCategory(updatedEquipment.getCategory());
-            existingEquipment.setVilleCentre(updatedEquipment.getVilleCentre());
             existingEquipment.setDescription(updatedEquipment.getDescription());
             existingEquipment.setImageUrl(updatedEquipment.getImageUrl());
             return equipmentRepository.save(existingEquipment);
