@@ -25,7 +25,9 @@ public class EquipmentController {
             @RequestBody Equipment equipment,
             @RequestHeader("X-User-Center") String userCenter) {
 
-        // Fixer automatiquement la ville du centre
+        if (userCenter == null || userCenter.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         equipment.setVilleCentre(userCenter);
 
         if (equipment.getName() == null || equipment.getCategory() == null) {
@@ -63,7 +65,6 @@ public class EquipmentController {
             @RequestBody Equipment equipment,
             @RequestHeader("X-User-Center") String userCenter) {
 
-        // Pour la modification, on conserve la ville d'origine
         Optional<Equipment> existing = equipmentService.getEquipmentById(id);
         if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();

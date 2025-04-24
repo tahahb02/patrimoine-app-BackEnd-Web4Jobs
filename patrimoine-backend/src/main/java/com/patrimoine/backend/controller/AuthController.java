@@ -36,14 +36,14 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of(
                 "message", "Connexion réussie",
-                "role", utilisateur.getRole(),
+                "role", utilisateur.getRole().name(),
                 "id", utilisateur.getId(),
                 "email", utilisateur.getEmail(),
                 "nom", utilisateur.getNom(),
                 "prenom", utilisateur.getPrenom(),
                 "phone", utilisateur.getPhone(),
                 "city", utilisateur.getCity(),
-                "villeCentre", utilisateur.getVilleCentre()
+                "villeCentre", utilisateur.getVilleCentre().name()
         ));
     }
 }
