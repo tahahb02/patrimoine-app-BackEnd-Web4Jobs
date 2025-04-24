@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
+
 @Service
 public class EquipmentService {
 
@@ -17,7 +18,6 @@ public class EquipmentService {
         this.equipmentRepository = equipmentRepository;
     }
 
-    // ✅ Ajouter un équipement
     public Equipment addEquipment(Equipment equipment) {
         if (equipment.getDateAdded() == null) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -26,35 +26,35 @@ public class EquipmentService {
         return equipmentRepository.save(equipment);
     }
 
-    // ✅ Récupérer tous les équipements
     public List<Equipment> getAllEquipments() {
         return equipmentRepository.findAll();
     }
 
-    // ✅ Récupérer un équipement par ID
     public Optional<Equipment> getEquipmentById(Long id) {
         return equipmentRepository.findById(id);
     }
 
-    // ✅ Modifier un équipement
     public Optional<Equipment> updateEquipment(Long id, Equipment updatedEquipment) {
         return equipmentRepository.findById(id).map(existingEquipment -> {
             existingEquipment.setName(updatedEquipment.getName());
             existingEquipment.setCategory(updatedEquipment.getCategory());
-            existingEquipment.setCenter(updatedEquipment.getCenter());
-            existingEquipment.setDescription(updatedEquipment.getDescription()); // Mettre à jour la description
-            existingEquipment.setImageUrl(updatedEquipment.getImageUrl()); // Mettre à jour l'URL de l'image
+            existingEquipment.setVilleCentre(updatedEquipment.getVilleCentre());
+            existingEquipment.setDescription(updatedEquipment.getDescription());
+            existingEquipment.setImageUrl(updatedEquipment.getImageUrl());
             return equipmentRepository.save(existingEquipment);
         });
     }
 
-    // ✅ Supprimer un équipement
     public boolean deleteEquipment(Long id) {
         if (equipmentRepository.existsById(id)) {
             equipmentRepository.deleteById(id);
-            return true; // Suppression réussie
+            return true;
         } else {
-            return false; // Équipement non trouvé
+            return false;
         }
+    }
+
+    public List<Equipment> getEquipmentsByVilleCentre(String villeCentre) {
+        return equipmentRepository.findByVilleCentreIgnoreCase(villeCentre);
     }
 }

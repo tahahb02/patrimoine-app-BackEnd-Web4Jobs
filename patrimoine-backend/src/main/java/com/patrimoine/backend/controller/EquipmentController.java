@@ -26,10 +26,9 @@ public class EquipmentController {
 
     @PostMapping("/add")
     public ResponseEntity<Equipment> addEquipment(@RequestBody Equipment equipment) {
-        if (equipment.getName() == null || equipment.getCategory() == null || equipment.getCenter() == null) {
+        if (equipment.getName() == null || equipment.getCategory() == null || equipment.getVilleCentre() == null) {
             return ResponseEntity.badRequest().build();
         }
-
         Equipment savedEquipment = equipmentService.addEquipment(equipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedEquipment);
     }
@@ -49,10 +48,9 @@ public class EquipmentController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Equipment> updateEquipment(@PathVariable Long id, @RequestBody Equipment equipment) {
-        if (equipment.getName() == null || equipment.getCategory() == null || equipment.getCenter() == null) {
+        if (equipment.getName() == null || equipment.getCategory() == null || equipment.getVilleCentre() == null) {
             return ResponseEntity.badRequest().build();
         }
-
         Optional<Equipment> updatedEquipment = equipmentService.updateEquipment(id, equipment);
         return updatedEquipment.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -74,10 +72,15 @@ public class EquipmentController {
         if (!equipment.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-
         Map<String, Object> historique =
                 demandeEquipementService.getStatistiquesUtilisationEquipement(equipment.get().getId().toString());
-
         return ResponseEntity.ok(historique);
+    }
+
+    // 🔍 Nouvelle route pour filtrer selon la ville du centre
+    @GetMapping("/ville/{villeCentre}")
+    public ResponseEntity<List<Equipment>> getEquipmentsByVilleCentre(@PathVariable String villeCentre) {
+        List<Equipment> equipments = equipmentService.getEquipmentsByVilleCentre(villeCentre);
+        return ResponseEntity.ok(equipments);
     }
 }
