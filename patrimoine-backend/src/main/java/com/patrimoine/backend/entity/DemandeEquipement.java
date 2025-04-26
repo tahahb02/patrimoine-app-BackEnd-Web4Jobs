@@ -63,10 +63,9 @@ public class DemandeEquipement {
     private Long dureeUtilisation;
 
     @ManyToOne
-    @JoinColumn(name = "adherant_id")
+    @JoinColumn(name = "adherant_id", nullable = false)
     private Utilisateur utilisateur;
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getIdEquipement() { return idEquipement; }

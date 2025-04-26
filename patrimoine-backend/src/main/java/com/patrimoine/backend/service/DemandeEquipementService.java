@@ -5,7 +5,6 @@ import com.patrimoine.backend.entity.Utilisateur;
 import com.patrimoine.backend.repository.DemandeEquipementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,25 +30,34 @@ public class DemandeEquipementService {
         return demandeEquipementRepository.findByUtilisateurId(userId);
     }
 
-    public List<DemandeEquipement> getDemandesEnAttente() {
-        return demandeEquipementRepository.findByStatut("EN_ATTENTE");
+
+    public List<DemandeEquipement> getDemandesEnAttenteByVilleCentre(String villeCentre) {
+        return demandeEquipementRepository.findDemandesEnAttenteByVilleCentre(villeCentre);
     }
 
-    public List<DemandeEquipement> getHistoriqueDemandes() {
-        return demandeEquipementRepository.findByStatutNot("EN_ATTENTE");
+    public List<DemandeEquipement> getDemandesByVilleCentre(String villeCentre) {
+        return demandeEquipementRepository.findByVilleCentre(villeCentre);
     }
 
-    public List<DemandeEquipement> getDemandesUrgentes() {
-        return demandeEquipementRepository.findDemandesUrgentes();
+    public List<DemandeEquipement> getHistoriqueDemandesByVilleCentre(String villeCentre) {
+        return demandeEquipementRepository.findByStatutNotAndVilleCentre("EN_ATTENTE", villeCentre);
     }
 
-    public List<DemandeEquipement> getDemandesEnRetard() {
-        return demandeEquipementRepository.findDemandesEnRetard();
+    public List<DemandeEquipement> getDemandesUrgentesByVilleCentre(String villeCentre) {
+        return demandeEquipementRepository.findDemandesUrgentesByVilleCentre(villeCentre);
     }
 
-    public DemandeEquipement mettreAJourStatut(Long id, String statut, String commentaire) {
+    public List<DemandeEquipement> getDemandesEnRetardByVilleCentre(String villeCentre) {
+        return demandeEquipementRepository.findDemandesEnRetardByVilleCentre(villeCentre);
+    }
+
+    public DemandeEquipement mettreAJourStatut(Long id, String statut, String commentaire, String villeCentre) {
         DemandeEquipement demande = demandeEquipementRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée"));
+
+        if (villeCentre != null && !demande.getVilleCentre().equals(villeCentre)) {
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier cette demande");
+        }
 
         demande.setStatut(statut);
         demande.setCommentaireResponsable(commentaire);
@@ -88,39 +96,45 @@ public class DemandeEquipementService {
         return statistiques;
     }
 
-    public List<DemandeEquipement> getDemandesLivraisonAujourdhui() {
+    public List<DemandeEquipement> getDemandesLivraisonAujourdhuiByVilleCentre(String villeCentre) {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
-        return demandeEquipementRepository.findByDateDebutBetweenAndStatut(
-                startOfDay, endOfDay, "ACCEPTEE");
+        return demandeEquipementRepository.findByDateDebutBetweenAndStatutAndVilleCentre(
+                startOfDay, endOfDay, "ACCEPTEE", villeCentre);
     }
 
-    public List<DemandeEquipement> getDemandesRetourAujourdhui() {
+    public List<DemandeEquipement> getDemandesRetourAujourdhuiByVilleCentre(String villeCentre) {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
-        return demandeEquipementRepository.findByDateFinBetweenAndStatut(
-                startOfDay, endOfDay, "ACCEPTEE");
+        return demandeEquipementRepository.findByDateFinBetweenAndStatutAndVilleCentre(
+                startOfDay, endOfDay, "ACCEPTEE", villeCentre);
     }
 
-    public DemandeEquipement validerLivraison(Long id) {
+    public DemandeEquipement validerLivraison(Long id, String villeCentre) {
         DemandeEquipement demande = demandeEquipementRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée"));
+
+        if (villeCentre != null && !demande.getVilleCentre().equals(villeCentre)) {
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier cette demande");
+        }
 
         demande.setStatut("LIVREE");
         return demandeEquipementRepository.save(demande);
     }
 
-    public DemandeEquipement validerRetour(Long id) {
+    public DemandeEquipement validerRetour(Long id, String villeCentre) {
         DemandeEquipement demande = demandeEquipementRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Demande non trouvée"));
 
+        if (villeCentre != null && !demande.getVilleCentre().equals(villeCentre)) {
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier cette demande");
+        }
+
         demande.setStatut("RETOURNEE");
         return demandeEquipementRepository.save(demande);
-
-        // Ici vous pourriez ajouter l'envoi du feedback
     }
 }
