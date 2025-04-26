@@ -278,4 +278,17 @@ public class DemandeEquipementController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    // Ajoutez cette nouvelle méthode
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<List<DemandeEquipement>> getDemandesByUser(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String token) {
+
+        try {
+            List<DemandeEquipement> demandes = demandeEquipementService.getDemandesByUtilisateur(userId);
+            return ResponseEntity.ok(demandes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

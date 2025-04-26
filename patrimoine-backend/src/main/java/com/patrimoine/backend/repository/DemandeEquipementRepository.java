@@ -52,5 +52,6 @@ public interface DemandeEquipementRepository extends JpaRepository<DemandeEquipe
             "GROUP BY d.utilisateur")
     List<Object[]> findUtilisationParAdherant(@Param("equipementId") String equipementId);
 
-
+    @Query("SELECT d FROM DemandeEquipement d WHERE d.utilisateur.id = :userId ORDER BY d.dateDemande DESC")
+    List<DemandeEquipement> findByUtilisateurIdOrderByDateDemandeDesc(@Param("userId") Long userId);
 }

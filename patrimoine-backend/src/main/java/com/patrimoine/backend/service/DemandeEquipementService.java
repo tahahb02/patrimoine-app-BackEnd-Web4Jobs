@@ -137,4 +137,6 @@ public class DemandeEquipementService {
         demande.setStatut("RETOURNEE");
         return demandeEquipementRepository.save(demande);
     }
+
+
 }
