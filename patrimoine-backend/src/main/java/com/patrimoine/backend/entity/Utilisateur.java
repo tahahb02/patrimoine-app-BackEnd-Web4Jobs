@@ -29,7 +29,7 @@ public class Utilisateur {
     private Role role = Role.ADHERANT;
 
     public enum Role {
-        ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN
+        ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN, RESPONSABLE_PATRIMOINE
     }
 
     public enum VilleCentre {

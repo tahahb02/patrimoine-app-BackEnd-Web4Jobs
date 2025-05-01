@@ -25,6 +25,10 @@ public class Equipment {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    // Dans Equipment.java
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean validated = false;
+
     @Column
     private String imageUrl;
 
@@ -56,6 +60,9 @@ public class Equipment {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public boolean getValidated() {return validated;}
+    public void setValidated(boolean validated) {this.validated = validated;}
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
