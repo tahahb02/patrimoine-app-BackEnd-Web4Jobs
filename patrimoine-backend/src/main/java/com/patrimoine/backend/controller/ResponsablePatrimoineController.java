@@ -43,5 +43,29 @@ public class ResponsablePatrimoineController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Autres endpoints nécessaires...
+    @DeleteMapping("/equipments/delete/{id}")
+    public ResponseEntity<Void> deleteEquipment(@PathVariable Long id) {
+        boolean deleted = equipmentService.deleteEquipment(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/equipments/update/{id}")
+    public ResponseEntity<Equipment> updateEquipment(@PathVariable Long id, @RequestBody Equipment equipment) {
+        Optional<Equipment> existing = equipmentService.getEquipmentById(id);
+        if (existing.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Conserver les valeurs existantes si non fournies
+        Equipment existingEquipment = existing.get();
+        if (equipment.getName() == null) equipment.setName(existingEquipment.getName());
+        if (equipment.getCategory() == null) equipment.setCategory(existingEquipment.getCategory());
+        if (equipment.getVilleCentre() == null) equipment.setVilleCentre(existingEquipment.getVilleCentre());
+        if (equipment.getDescription() == null) equipment.setDescription(existingEquipment.getDescription());
+        if (equipment.getImageUrl() == null) equipment.setImageUrl(existingEquipment.getImageUrl());
+
+        Optional<Equipment> updatedEquipment = equipmentService.updateEquipment(id, equipment);
+        return updatedEquipment.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
