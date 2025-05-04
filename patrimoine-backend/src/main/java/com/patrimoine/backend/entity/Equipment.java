@@ -1,6 +1,8 @@
 package com.patrimoine.backend.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "equipments")
@@ -17,7 +19,7 @@ public class Equipment {
     private String category;
 
     @Column(nullable = false)
-    private String villeCentre; // Renommé depuis 'center'
+    private String villeCentre;
 
     @Column(nullable = false)
     private String dateAdded;
@@ -25,45 +27,44 @@ public class Equipment {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Dans Equipment.java
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean validated = false;
 
     @Column
     private String imageUrl;
 
-    public Equipment() {}
+    @Column
+    private String addedBy;
 
-    public Equipment(String name, String category, String villeCentre, String dateAdded, String description, String imageUrl) {
-        this.name = name;
-        this.category = category;
-        this.villeCentre = villeCentre;
-        this.dateAdded = dateAdded;
-        this.description = description;
-        this.imageUrl = imageUrl;
+    @Column
+    private String addedByName;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.dateAdded == null) {
+            this.dateAdded = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
     }
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
-
     public String getVilleCentre() { return villeCentre; }
     public void setVilleCentre(String villeCentre) { this.villeCentre = villeCentre; }
-
     public String getDateAdded() { return dateAdded; }
     public void setDateAdded(String dateAdded) { this.dateAdded = dateAdded; }
-
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-
-    public boolean getValidated() {return validated;}
-    public void setValidated(boolean validated) {this.validated = validated;}
-
+    public boolean isValidated() { return validated; }
+    public void setValidated(boolean validated) { this.validated = validated; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getAddedBy() { return addedBy; }
+    public void setAddedBy(String addedBy) { this.addedBy = addedBy; }
+    public String getAddedByName() { return addedByName; }
+    public void setAddedByName(String addedByName) { this.addedByName = addedByName; }
 }

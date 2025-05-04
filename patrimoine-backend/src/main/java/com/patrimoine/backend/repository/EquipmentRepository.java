@@ -8,4 +8,8 @@ import java.util.List;
 @Repository
 public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     List<Equipment> findByVilleCentreIgnoreCase(String villeCentre);
+    List<Equipment> findByVilleCentreIgnoreCaseAndValidatedTrue(String villeCentre);
+    List<Equipment> findByValidatedFalse();
+    List<Equipment> findByAddedBy(String email);
+    List<Equipment> findByValidatedTrue();
 }

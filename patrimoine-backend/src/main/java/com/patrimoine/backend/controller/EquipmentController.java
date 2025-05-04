@@ -23,33 +23,69 @@ public class EquipmentController {
     @PostMapping("/add")
     public ResponseEntity<Equipment> addEquipment(
             @RequestBody Equipment equipment,
-            @RequestHeader("X-User-Center") String userCenter) {
+            @RequestHeader("X-User-Center") String userCenter,
+            @RequestHeader("X-User-Email") String userEmail,
+            @RequestHeader("X-User-Name") String userName) {
 
-        if (userCenter == null || userCenter.isEmpty()) {
+        if (userCenter == null || userEmail == null || userName == null) {
             return ResponseEntity.badRequest().build();
         }
+
         equipment.setVilleCentre(userCenter);
-
-        if (equipment.getName() == null || equipment.getCategory() == null) {
-            return ResponseEntity.badRequest().build();
-        }
+        equipment.setValidated(false);
+        equipment.setAddedBy(userEmail);
+        equipment.setAddedByName(userName);
 
         Equipment savedEquipment = equipmentService.addEquipment(equipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedEquipment);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Equipment>> getAllEquipments(
-            @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader("X-User-Center") String userCenter) {
+    @GetMapping("/validated")
+    public ResponseEntity<List<Equipment>> getValidatedEquipments(
+            @RequestHeader("X-User-Center") String userCenter,
+            @RequestHeader("X-User-Role") String userRole) {
 
         List<Equipment> equipments;
-        if ("ADMIN".equals(userRole)) {
-            equipments = equipmentService.getAllEquipments();
+        if ("RESPONSABLE_PATRIMOINE".equals(userRole) || "ADMIN".equals(userRole)) {
+            equipments = equipmentService.getValidatedEquipments();
         } else {
-            equipments = equipmentService.getEquipmentsByVilleCentre(userCenter);
+            equipments = equipmentService.getValidatedEquipmentsByCenter(userCenter);
         }
         return ResponseEntity.ok(equipments);
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Equipment>> getPendingEquipments(
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole) && !"ADMIN".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Equipment> equipments = equipmentService.getPendingEquipments();
+        return ResponseEntity.ok(equipments);
+    }
+
+    @GetMapping("/my-equipments")
+    public ResponseEntity<List<Equipment>> getMyEquipments(
+            @RequestHeader("X-User-Email") String userEmail) {
+
+        List<Equipment> equipments = equipmentService.getEquipmentsByAddedBy(userEmail);
+        return ResponseEntity.ok(equipments);
+    }
+
+    @PutMapping("/validate/{id}")
+    public ResponseEntity<Equipment> validateEquipment(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Optional<Equipment> updatedEquipment = equipmentService.validateEquipment(id);
+        return updatedEquipment.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}")
@@ -63,17 +99,24 @@ public class EquipmentController {
     public ResponseEntity<Equipment> updateEquipment(
             @PathVariable Long id,
             @RequestBody Equipment equipment,
-            @RequestHeader("X-User-Center") String userCenter) {
+            @RequestHeader("X-User-Email") String userEmail,
+            @RequestHeader("X-User-Role") String userRole) {
 
         Optional<Equipment> existing = equipmentService.getEquipmentById(id);
         if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        equipment.setVilleCentre(existing.get().getVilleCentre());
 
-        if (equipment.getName() == null || equipment.getCategory() == null) {
-            return ResponseEntity.badRequest().build();
+        if (!existing.get().getAddedBy().equals(userEmail) &&
+                !"RESPONSABLE_PATRIMOINE".equals(userRole) &&
+                !"ADMIN".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+        equipment.setVilleCentre(existing.get().getVilleCentre());
+        equipment.setValidated(existing.get().isValidated());
+        equipment.setAddedBy(existing.get().getAddedBy());
+        equipment.setAddedByName(existing.get().getAddedByName());
 
         Optional<Equipment> updatedEquipment = equipmentService.updateEquipment(id, equipment);
         return updatedEquipment.map(ResponseEntity::ok)
@@ -81,7 +124,22 @@ public class EquipmentController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteEquipment(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEquipment(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Email") String userEmail,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        Optional<Equipment> equipment = equipmentService.getEquipmentById(id);
+        if (equipment.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!equipment.get().getAddedBy().equals(userEmail) &&
+                !"RESPONSABLE_PATRIMOINE".equals(userRole) &&
+                !"ADMIN".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         boolean deleted = equipmentService.deleteEquipment(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
