@@ -16,8 +16,24 @@ public class EquipmentController {
 
     private final EquipmentService equipmentService;
 
+
     public EquipmentController(EquipmentService equipmentService) {
         this.equipmentService = equipmentService;
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<Equipment>> getEquipmentsByCenter(
+            @RequestHeader("X-User-Center") String userCenter,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        List<Equipment> equipments;
+        if ("ADMIN".equals(userRole)) {
+            equipments = equipmentService.getAllEquipments();
+        } else {
+            equipments = equipmentService.getValidatedEquipmentsByCenter(userCenter);
+        }
+        return ResponseEntity.ok(equipments);
     }
 
     @PostMapping("/add")
@@ -143,4 +159,6 @@ public class EquipmentController {
         boolean deleted = equipmentService.deleteEquipment(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+
 }

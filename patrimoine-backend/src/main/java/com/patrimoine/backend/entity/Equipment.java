@@ -39,6 +39,9 @@ public class Equipment {
     @Column
     private String addedByName;
 
+    @Column
+    private String status;
+
     @PrePersist
     public void prePersist() {
         if (this.dateAdded == null) {
@@ -67,4 +70,6 @@ public class Equipment {
     public void setAddedBy(String addedBy) { this.addedBy = addedBy; }
     public String getAddedByName() { return addedByName; }
     public void setAddedByName(String addedByName) { this.addedByName = addedByName; }
+    public String getStatus() {return status;}
+    public void setStatus(String status) {this.status = status;}
 }

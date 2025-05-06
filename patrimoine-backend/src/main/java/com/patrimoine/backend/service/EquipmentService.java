@@ -5,6 +5,7 @@ import com.patrimoine.backend.repository.EquipmentRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EquipmentService {
@@ -66,5 +67,12 @@ public class EquipmentService {
             return true;
         }
         return false;
+    }
+
+    public List<Equipment> getAvailableEquipmentsByCenter(String villeCentre) {
+        List<Equipment> equipments = equipmentRepository.findByVilleCentreIgnoreCaseAndValidatedTrue(villeCentre);
+        return equipments.stream()
+                .filter(equip -> equip.getStatus() == null || "Disponible".equalsIgnoreCase(equip.getStatus()))
+                .collect(Collectors.toList());
     }
 }
