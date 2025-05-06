@@ -76,4 +76,6 @@ public class UtilisateurService {
                 })
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
     }
+
+
 }

@@ -3,6 +3,7 @@ package com.patrimoine.backend.controller;
 import com.patrimoine.backend.entity.Equipment;
 import com.patrimoine.backend.service.EquipmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -29,10 +30,15 @@ public class ResponsablePatrimoineController {
     }
 
     @GetMapping("/equipments/all")
-    public ResponseEntity<List<Equipment>> getAllEquipments() {
+    public ResponseEntity<List<Equipment>> getAllEquipments(@RequestHeader("Authorization") String token,
+                                                            @RequestHeader("X-User-Role") String userRole) {
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         List<Equipment> equipments = equipmentService.getAllEquipments();
         return ResponseEntity.ok(equipments);
     }
+
 
     @GetMapping("/equipments/validated")
     public ResponseEntity<List<Equipment>> getValidatedEquipments() {

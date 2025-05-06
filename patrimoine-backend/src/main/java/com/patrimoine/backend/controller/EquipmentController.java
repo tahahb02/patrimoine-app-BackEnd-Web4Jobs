@@ -160,5 +160,16 @@ public class EquipmentController {
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/responsable/all")
+    public ResponseEntity<List<Equipment>> getAllEquipmentsForResponsable(
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Equipment> equipments = equipmentService.getAllEquipments();
+        return ResponseEntity.ok(equipments);
+    }
 
 }

@@ -29,11 +29,21 @@ public class Utilisateur {
     private Role role = Role.ADHERANT;
 
     public enum Role {
-        ADHERANT, RESPONSABLE, DIRECTEUR, ADMIN, RESPONSABLE_PATRIMOINE
+        ADHERANT,
+        RESPONSABLE,
+        DIRECTEUR,
+        ADMIN,
+        RESPONSABLE_PATRIMOINE
     }
 
     public enum VilleCentre {
-        TINGHIR, TEMARA, ESSAOUIRA, DAKHLA, LAAYOUNE, NADOR, AIN_EL_AOUDA;
+        TINGHIR,
+        TEMARA,
+        ESSAOUIRA,
+        DAKHLA,
+        LAAYOUNE,
+        NADOR,
+        AIN_EL_AOUDA;
 
         @Override
         public String toString() {
