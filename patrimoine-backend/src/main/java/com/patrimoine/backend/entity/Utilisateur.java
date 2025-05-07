@@ -39,11 +39,13 @@ public class Utilisateur {
     public enum VilleCentre {
         TINGHIR,
         TEMARA,
+        TCHAD,
         ESSAOUIRA,
         DAKHLA,
         LAAYOUNE,
         NADOR,
         AIN_EL_AOUDA;
+
 
         @Override
         public String toString() {
