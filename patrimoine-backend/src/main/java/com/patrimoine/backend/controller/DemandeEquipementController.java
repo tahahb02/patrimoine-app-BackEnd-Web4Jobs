@@ -2,6 +2,7 @@ package com.patrimoine.backend.controller;
 
 import com.patrimoine.backend.entity.DemandeEquipement;
 import com.patrimoine.backend.entity.Utilisateur;
+import com.patrimoine.backend.repository.DemandeEquipementRepository;
 import com.patrimoine.backend.service.DemandeEquipementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,9 @@ public class DemandeEquipementController {
 
     @Autowired
     private DemandeEquipementService demandeEquipementService;
+
+    @Autowired
+    private DemandeEquipementRepository demandeEquipementRepository;
 
     @GetMapping("/en-attente/{villeCentre}")
     public ResponseEntity<List<DemandeEquipement>> getDemandesEnAttenteByVilleCentre(
@@ -291,4 +295,18 @@ public class DemandeEquipementController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/rp/historique")
+    public ResponseEntity<List<DemandeEquipement>> getHistoriqueDemandesForRP(
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<DemandeEquipement> demandes = demandeEquipementRepository.findAllByOrderByDateDemandeDesc();
+        return ResponseEntity.ok(demandes);
+    }
+
+
 }

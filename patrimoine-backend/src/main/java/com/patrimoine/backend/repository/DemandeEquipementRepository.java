@@ -54,4 +54,7 @@
 
         @Query("SELECT d FROM DemandeEquipement d WHERE d.utilisateur.id = :userId ORDER BY d.dateDemande DESC")
         List<DemandeEquipement> findByUtilisateurIdOrderByDateDemandeDesc(@Param("userId") Long userId);
+
+        @Query("SELECT d FROM DemandeEquipement d ORDER BY d.dateDemande DESC")
+        List<DemandeEquipement> findAllByOrderByDateDemandeDesc();
     }
