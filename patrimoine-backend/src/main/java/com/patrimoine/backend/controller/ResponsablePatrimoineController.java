@@ -1,12 +1,17 @@
 package com.patrimoine.backend.controller;
 
 import com.patrimoine.backend.entity.Equipment;
+import com.patrimoine.backend.entity.Utilisateur;
 import com.patrimoine.backend.service.EquipmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/rp")
@@ -46,5 +51,15 @@ public class ResponsablePatrimoineController {
         return ResponseEntity.ok(equipments);
     }
 
+    @GetMapping("/historique-equipements/{id}")
+    public ResponseEntity<Map<String, Object>> getEquipmentHistory(@PathVariable Long id) {
+        Map<String, Object> history = equipmentService.getEquipmentHistory(id);
+        return ResponseEntity.ok(history);
+    }
 
+    @GetMapping("/centers")
+    public ResponseEntity<List<String>> getAllCenters() {
+        List<String> centers = equipmentService.getAllCenters();
+        return ResponseEntity.ok(centers);
+    }
 }

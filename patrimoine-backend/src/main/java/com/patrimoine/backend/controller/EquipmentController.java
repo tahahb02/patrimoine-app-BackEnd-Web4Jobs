@@ -172,4 +172,6 @@ public class EquipmentController {
         return ResponseEntity.ok(equipments);
     }
 
+
+
 }

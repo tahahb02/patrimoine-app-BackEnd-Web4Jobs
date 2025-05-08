@@ -1,10 +1,11 @@
 package com.patrimoine.backend.service;
 
 import com.patrimoine.backend.entity.Equipment;
+import com.patrimoine.backend.entity.Utilisateur;
 import com.patrimoine.backend.repository.EquipmentRepository;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,6 +74,48 @@ public class EquipmentService {
         List<Equipment> equipments = equipmentRepository.findByVilleCentreIgnoreCaseAndValidatedTrue(villeCentre);
         return equipments.stream()
                 .filter(equip -> equip.getStatus() == null || "Disponible".equalsIgnoreCase(equip.getStatus()))
+                .collect(Collectors.toList());
+    }
+
+
+    public Map<String, Object> getEquipmentHistory(Long equipmentId) {
+        Map<String, Object> history = new HashMap<>();
+        Optional<Equipment> equipmentOpt = equipmentRepository.findById(equipmentId);
+
+        if (equipmentOpt.isEmpty()) {
+            return history;
+        }
+
+        Equipment equipment = equipmentOpt.get();
+        history.put("equipmentId", equipment.getId());
+        history.put("equipmentName", equipment.getName());
+        history.put("villeCentre", equipment.getVilleCentre());
+
+        // Implémentation basique - à adapter selon votre modèle de Demand
+        List<Map<String, Object>> utilisations = new ArrayList<>();
+        /*
+        List<Demand> demands = demandRepository.findByEquipmentIdAndStatus(equipmentId, "VALIDEE");
+        for (Demand demand : demands) {
+            Map<String, Object> utilisation = new HashMap<>();
+            Utilisateur user = demand.getUser();
+            utilisation.put("nom", user.getNom());
+            utilisation.put("prenom", user.getPrenom());
+            utilisation.put("email", user.getEmail());
+            utilisation.put("telephone", user.getPhone());
+            utilisation.put("heuresUtilisation", demand.getDuree());
+            utilisations.add(utilisation);
+        }
+        */
+
+        history.put("utilisations", utilisations);
+        history.put("totalUtilisations", utilisations.size());
+
+        return history;
+    }
+
+    public List<String> getAllCenters() {
+        return Arrays.stream(Utilisateur.VilleCentre.values())
+                .map(Enum::name)
                 .collect(Collectors.toList());
     }
 }
