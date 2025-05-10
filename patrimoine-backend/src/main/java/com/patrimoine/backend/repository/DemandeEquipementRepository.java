@@ -15,7 +15,7 @@
         List<DemandeEquipement> findByStatut(String statut);
         List<DemandeEquipement> findByStatutNot(String statut);
         List<DemandeEquipement> findByStatutNotAndVilleCentre(String statut, String villeCentre);
-
+        List<DemandeEquipement> findByNomEquipementAndStatut(String nomEquipement, String statut);
 
         @Query("SELECT d FROM DemandeEquipement d WHERE d.urgence = 'ELEVEE' AND d.villeCentre = :villeCentre")
         List<DemandeEquipement> findDemandesUrgentesByVilleCentre(@Param("villeCentre") String villeCentre);

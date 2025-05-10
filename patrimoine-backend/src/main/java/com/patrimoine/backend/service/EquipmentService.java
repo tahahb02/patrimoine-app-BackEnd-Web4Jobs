@@ -2,7 +2,9 @@ package com.patrimoine.backend.service;
 
 import com.patrimoine.backend.entity.Equipment;
 import com.patrimoine.backend.entity.Utilisateur;
+import com.patrimoine.backend.entity.DemandeEquipement;
 import com.patrimoine.backend.repository.EquipmentRepository;
+import com.patrimoine.backend.repository.DemandeEquipementRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,9 +14,12 @@ import java.util.stream.Collectors;
 public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
+    private final DemandeEquipementRepository demandeEquipementRepository;
 
-    public EquipmentService(EquipmentRepository equipmentRepository) {
+    public EquipmentService(EquipmentRepository equipmentRepository,
+                            DemandeEquipementRepository demandeEquipementRepository) {
         this.equipmentRepository = equipmentRepository;
+        this.demandeEquipementRepository = demandeEquipementRepository;
     }
 
     public Equipment addEquipment(Equipment equipment) {
@@ -51,6 +56,7 @@ public class EquipmentService {
             existingEquipment.setCategory(updatedEquipment.getCategory());
             existingEquipment.setDescription(updatedEquipment.getDescription());
             existingEquipment.setImageUrl(updatedEquipment.getImageUrl());
+            existingEquipment.setStatus(updatedEquipment.getStatus());
             return equipmentRepository.save(existingEquipment);
         });
     }
@@ -77,38 +83,43 @@ public class EquipmentService {
                 .collect(Collectors.toList());
     }
 
-
     public Map<String, Object> getEquipmentHistory(Long equipmentId) {
-        Map<String, Object> history = new HashMap<>();
         Optional<Equipment> equipmentOpt = equipmentRepository.findById(equipmentId);
-
         if (equipmentOpt.isEmpty()) {
-            return history;
+            return Collections.emptyMap();
         }
 
         Equipment equipment = equipmentOpt.get();
-        history.put("equipmentId", equipment.getId());
-        history.put("equipmentName", equipment.getName());
-        history.put("villeCentre", equipment.getVilleCentre());
+        List<DemandeEquipement> demandes = demandeEquipementRepository.findByNomEquipementAndStatut(equipment.getName(), "RETOURNEE");
 
-        // Implémentation basique - à adapter selon votre modèle de Demand
+        Map<String, Object> history = new HashMap<>();
         List<Map<String, Object>> utilisations = new ArrayList<>();
-        /*
-        List<Demand> demands = demandRepository.findByEquipmentIdAndStatus(equipmentId, "VALIDEE");
-        for (Demand demand : demands) {
+        long totalHeures = 0;
+
+        for (DemandeEquipement demande : demandes) {
             Map<String, Object> utilisation = new HashMap<>();
-            Utilisateur user = demand.getUser();
+            Utilisateur user = demande.getUtilisateur();
+
             utilisation.put("nom", user.getNom());
             utilisation.put("prenom", user.getPrenom());
             utilisation.put("email", user.getEmail());
             utilisation.put("telephone", user.getPhone());
-            utilisation.put("heuresUtilisation", demand.getDuree());
+            utilisation.put("villeCentre", demande.getVilleCentre());
+
+            long duree = demande.getDureeUtilisation() != null ? demande.getDureeUtilisation() : 0;
+            utilisation.put("heuresUtilisation", duree);
+            totalHeures += duree;
+
             utilisations.add(utilisation);
         }
-        */
 
+        history.put("equipmentId", equipment.getId());
+        history.put("equipmentName", equipment.getName());
+        history.put("villeCentre", equipment.getVilleCentre());
+        history.put("category", equipment.getCategory());
         history.put("utilisations", utilisations);
-        history.put("totalUtilisations", utilisations.size());
+        history.put("totalUtilisations", demandes.size());
+        history.put("totalHeures", totalHeures);
 
         return history;
     }
@@ -117,5 +128,9 @@ public class EquipmentService {
         return Arrays.stream(Utilisateur.VilleCentre.values())
                 .map(Enum::name)
                 .collect(Collectors.toList());
+    }
+
+    public List<Equipment> findByVilleCentreIgnoreCaseAndStatus(String villeCentre, String status) {
+        return equipmentRepository.findByVilleCentreIgnoreCaseAndStatus(villeCentre, status);
     }
 }
