@@ -16,11 +16,9 @@ public class EquipmentController {
 
     private final EquipmentService equipmentService;
 
-
     public EquipmentController(EquipmentService equipmentService) {
         this.equipmentService = equipmentService;
     }
-
 
     @GetMapping
     public ResponseEntity<List<Equipment>> getEquipmentsByCenter(
@@ -95,7 +93,7 @@ public class EquipmentController {
             @PathVariable Long id,
             @RequestHeader("X-User-Role") String userRole) {
 
-        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)){
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -171,7 +169,4 @@ public class EquipmentController {
         List<Equipment> equipments = equipmentService.getAllEquipments();
         return ResponseEntity.ok(equipments);
     }
-
-
-
 }
