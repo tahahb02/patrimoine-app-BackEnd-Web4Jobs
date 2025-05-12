@@ -42,6 +42,9 @@ public class Equipment {
     @Column
     private String status;
 
+    @Column(name = "en_maintenance")
+    private boolean enMaintenance = false;
+
     @PrePersist
     public void prePersist() {
         if (this.dateAdded == null) {
@@ -72,4 +75,7 @@ public class Equipment {
     public void setAddedByName(String addedByName) { this.addedByName = addedByName; }
     public String getStatus() {return status;}
     public void setStatus(String status) {this.status = status;}
+    public boolean isEnMaintenance() { return enMaintenance; }
+    public void setEnMaintenance(boolean enMaintenance) { this.enMaintenance = enMaintenance; }
+
 }

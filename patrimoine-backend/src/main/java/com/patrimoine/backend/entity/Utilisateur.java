@@ -33,7 +33,8 @@ public class Utilisateur {
         RESPONSABLE,
         DIRECTEUR,
         ADMIN,
-        RESPONSABLE_PATRIMOINE
+        RESPONSABLE_PATRIMOINE,
+        TECHNICIEN
     }
 
     public enum VilleCentre {

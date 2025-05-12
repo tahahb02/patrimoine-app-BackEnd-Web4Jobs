@@ -169,4 +169,45 @@ public class EquipmentController {
         List<Equipment> equipments = equipmentService.getAllEquipments();
         return ResponseEntity.ok(equipments);
     }
+    // Dans EquipmentController.java
+    @PutMapping("/{id}/maintenance")
+    public ResponseEntity<Equipment> mettreEnMaintenance(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"TECHNICIEN".equals(userRole) && !"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Optional<Equipment> equipment = equipmentService.mettreEnMaintenance(id);
+        return equipment.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/fin-maintenance")
+    public ResponseEntity<Equipment> sortirDeMaintenance(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"TECHNICIEN".equals(userRole) && !"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Optional<Equipment> equipment = equipmentService.sortirDeMaintenance(id);
+        return equipment.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/maintenance")
+    public ResponseEntity<List<Equipment>> getEquipementsEnMaintenance(
+            @RequestHeader("X-User-Center") String userCenter,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"TECHNICIEN".equals(userRole) && !"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Equipment> equipments = equipmentService.getEquipementsEnMaintenanceByCentre(userCenter);
+        return ResponseEntity.ok(equipments);
+    }
 }

@@ -13,5 +13,7 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     List<Equipment> findByAddedBy(String email);
     List<Equipment> findByValidatedTrue();
     List<Equipment> findByVilleCentreIgnoreCaseAndStatus(String villeCentre, String status);
+    List<Equipment> findByEnMaintenance(boolean enMaintenance);
+    List<Equipment> findByVilleCentreIgnoreCaseAndEnMaintenance(String villeCentre, boolean enMaintenance);
 
 }

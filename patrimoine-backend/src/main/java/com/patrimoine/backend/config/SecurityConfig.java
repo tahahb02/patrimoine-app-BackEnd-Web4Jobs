@@ -16,6 +16,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/patrimoine/**").hasRole("RESPONSABLE_PATRIMOINE")
+                        .requestMatchers("/api/diagnostics/**").hasRole("TECHNICIEN")
+                        .requestMatchers("/api/maintenances/**").hasAnyRole("TECHNICIEN", "RESPONSABLE_PATRIMOINE")
                         .anyRequest().permitAll()
                 )
                 .formLogin(login -> login.disable())

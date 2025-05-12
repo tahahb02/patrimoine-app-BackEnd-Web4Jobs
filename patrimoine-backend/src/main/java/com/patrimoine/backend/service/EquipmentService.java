@@ -133,4 +133,27 @@ public class EquipmentService {
     public List<Equipment> findByVilleCentreIgnoreCaseAndStatus(String villeCentre, String status) {
         return equipmentRepository.findByVilleCentreIgnoreCaseAndStatus(villeCentre, status);
     }
+
+    // Dans EquipmentService.java
+    public Optional<Equipment> mettreEnMaintenance(Long id) {
+        return equipmentRepository.findById(id).map(equipment -> {
+            equipment.setEnMaintenance(true);
+            return equipmentRepository.save(equipment);
+        });
+    }
+
+    public Optional<Equipment> sortirDeMaintenance(Long id) {
+        return equipmentRepository.findById(id).map(equipment -> {
+            equipment.setEnMaintenance(false);
+            return equipmentRepository.save(equipment);
+        });
+    }
+
+    public List<Equipment> getEquipementsEnMaintenance() {
+        return equipmentRepository.findByEnMaintenance(true);
+    }
+
+    public List<Equipment> getEquipementsEnMaintenanceByCentre(String villeCentre) {
+        return equipmentRepository.findByVilleCentreIgnoreCaseAndEnMaintenance(villeCentre, true);
+    }
 }
