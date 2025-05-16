@@ -49,6 +49,7 @@ public class EquipmentController {
         equipment.setValidated(false);
         equipment.setAddedBy(userEmail);
         equipment.setAddedByName(userName);
+        equipment.setEnMaintenance(false);
 
         Equipment savedEquipment = equipmentService.addEquipment(equipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedEquipment);
@@ -131,6 +132,7 @@ public class EquipmentController {
         equipment.setValidated(existing.get().isValidated());
         equipment.setAddedBy(existing.get().getAddedBy());
         equipment.setAddedByName(existing.get().getAddedByName());
+        equipment.setEnMaintenance(existing.get().isEnMaintenance());
 
         Optional<Equipment> updatedEquipment = equipmentService.updateEquipment(id, equipment);
         return updatedEquipment.map(ResponseEntity::ok)
@@ -169,7 +171,7 @@ public class EquipmentController {
         List<Equipment> equipments = equipmentService.getAllEquipments();
         return ResponseEntity.ok(equipments);
     }
-    // Dans EquipmentController.java
+
     @PutMapping("/{id}/maintenance")
     public ResponseEntity<Equipment> mettreEnMaintenance(
             @PathVariable Long id,

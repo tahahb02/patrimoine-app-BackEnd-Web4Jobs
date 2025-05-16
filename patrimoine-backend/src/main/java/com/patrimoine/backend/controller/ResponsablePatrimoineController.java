@@ -34,17 +34,6 @@ public class ResponsablePatrimoineController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/equipments/all")
-    public ResponseEntity<List<Equipment>> getAllEquipments(@RequestHeader("Authorization") String token,
-                                                            @RequestHeader("X-User-Role") String userRole) {
-        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        List<Equipment> equipments = equipmentService.getAllEquipments();
-        return ResponseEntity.ok(equipments);
-    }
-
-
     @GetMapping("/equipments/validated")
     public ResponseEntity<List<Equipment>> getValidatedEquipments() {
         List<Equipment> equipments = equipmentService.getValidatedEquipments();
@@ -61,5 +50,26 @@ public class ResponsablePatrimoineController {
     public ResponseEntity<List<String>> getAllCenters() {
         List<String> centers = equipmentService.getAllCenters();
         return ResponseEntity.ok(centers);
+    }
+
+    @GetMapping("/equipments/all")
+    public ResponseEntity<List<Equipment>> getAllEquipmentsForRP(
+            @RequestHeader("X-User-Role") String userRole) {
+
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Equipment> equipments = equipmentService.getAllEquipments()
+                .stream()
+                .map(equipment -> {
+                    if (equipment.isEnMaintenance() == null) {
+                        equipment.setEnMaintenance(false);
+                    }
+                    return equipment;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(equipments);
     }
 }

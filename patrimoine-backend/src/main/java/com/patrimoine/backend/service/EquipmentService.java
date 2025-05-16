@@ -23,31 +23,43 @@ public class EquipmentService {
     }
 
     public Equipment addEquipment(Equipment equipment) {
+        equipment.setEnMaintenance(false); // Initialisation explicite
         return equipmentRepository.save(equipment);
     }
 
     public List<Equipment> getAllEquipments() {
-        return equipmentRepository.findAll();
+        return equipmentRepository.findAll().stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
     public List<Equipment> getValidatedEquipments() {
-        return equipmentRepository.findByValidatedTrue();
+        return equipmentRepository.findByValidatedTrue().stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
     public List<Equipment> getValidatedEquipmentsByCenter(String villeCentre) {
-        return equipmentRepository.findByVilleCentreIgnoreCaseAndValidatedTrue(villeCentre);
+        return equipmentRepository.findByVilleCentreIgnoreCaseAndValidatedTrue(villeCentre).stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
     public List<Equipment> getPendingEquipments() {
-        return equipmentRepository.findByValidatedFalse();
+        return equipmentRepository.findByValidatedFalse().stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
     public List<Equipment> getEquipmentsByAddedBy(String email) {
-        return equipmentRepository.findByAddedBy(email);
+        return equipmentRepository.findByAddedBy(email).stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
     public Optional<Equipment> getEquipmentById(Long id) {
-        return equipmentRepository.findById(id);
+        return equipmentRepository.findById(id)
+                .map(this::normalizeEquipment);
     }
 
     public Optional<Equipment> updateEquipment(Long id, Equipment updatedEquipment) {
@@ -57,6 +69,7 @@ public class EquipmentService {
             existingEquipment.setDescription(updatedEquipment.getDescription());
             existingEquipment.setImageUrl(updatedEquipment.getImageUrl());
             existingEquipment.setStatus(updatedEquipment.getStatus());
+            existingEquipment.setEnMaintenance(updatedEquipment.isEnMaintenance());
             return equipmentRepository.save(existingEquipment);
         });
     }
@@ -77,9 +90,9 @@ public class EquipmentService {
     }
 
     public List<Equipment> getAvailableEquipmentsByCenter(String villeCentre) {
-        List<Equipment> equipments = equipmentRepository.findByVilleCentreIgnoreCaseAndValidatedTrue(villeCentre);
-        return equipments.stream()
-                .filter(equip -> equip.getStatus() == null || "Disponible".equalsIgnoreCase(equip.getStatus()))
+        return equipmentRepository.findByVilleCentreIgnoreCaseAndValidatedTrue(villeCentre).stream()
+                .filter(equip -> !equip.isEnMaintenance() &&
+                        (equip.getStatus() == null || equip.getStatus().equalsIgnoreCase("Disponible")))
                 .collect(Collectors.toList());
     }
 
@@ -131,10 +144,11 @@ public class EquipmentService {
     }
 
     public List<Equipment> findByVilleCentreIgnoreCaseAndStatus(String villeCentre, String status) {
-        return equipmentRepository.findByVilleCentreIgnoreCaseAndStatus(villeCentre, status);
+        return equipmentRepository.findByVilleCentreIgnoreCaseAndStatus(villeCentre, status).stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
-    // Dans EquipmentService.java
     public Optional<Equipment> mettreEnMaintenance(Long id) {
         return equipmentRepository.findById(id).map(equipment -> {
             equipment.setEnMaintenance(true);
@@ -150,10 +164,24 @@ public class EquipmentService {
     }
 
     public List<Equipment> getEquipementsEnMaintenance() {
-        return equipmentRepository.findByEnMaintenance(true);
+        return equipmentRepository.findByEnMaintenance(true).stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
     }
 
     public List<Equipment> getEquipementsEnMaintenanceByCentre(String villeCentre) {
-        return equipmentRepository.findByVilleCentreIgnoreCaseAndEnMaintenance(villeCentre, true);
+        return equipmentRepository.findByVilleCentreIgnoreCaseAndEnMaintenance(villeCentre, true).stream()
+                .map(this::normalizeEquipment)
+                .collect(Collectors.toList());
+    }
+
+    private Equipment normalizeEquipment(Equipment equipment) {
+        if (equipment.isEnMaintenance() == null) {
+            equipment.setEnMaintenance(false);
+        }
+        if (equipment.getStatus() == null) {
+            equipment.setStatus("Disponible");
+        }
+        return equipment;
     }
 }

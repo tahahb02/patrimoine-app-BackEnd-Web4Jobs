@@ -43,12 +43,15 @@ public class Equipment {
     private String status;
 
     @Column(name = "en_maintenance")
-    private boolean enMaintenance = false;
+    private Boolean enMaintenance = false;
 
     @PrePersist
     public void prePersist() {
         if (this.dateAdded == null) {
             this.dateAdded = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+        if (this.enMaintenance == null) {
+            this.enMaintenance = false;
         }
     }
 
@@ -73,9 +76,10 @@ public class Equipment {
     public void setAddedBy(String addedBy) { this.addedBy = addedBy; }
     public String getAddedByName() { return addedByName; }
     public void setAddedByName(String addedByName) { this.addedByName = addedByName; }
-    public String getStatus() {return status;}
-    public void setStatus(String status) {this.status = status;}
-    public boolean isEnMaintenance() { return enMaintenance; }
-    public void setEnMaintenance(boolean enMaintenance) { this.enMaintenance = enMaintenance; }
-
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public Boolean isEnMaintenance() { return enMaintenance != null ? enMaintenance : false; }
+    public void setEnMaintenance(Boolean enMaintenance) {
+        this.enMaintenance = enMaintenance != null ? enMaintenance : false;
+    }
 }

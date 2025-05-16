@@ -38,6 +38,8 @@ public class DiagnosticEquipement {
         ELEVE
     }
 
+
+
     // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -64,3 +66,4 @@ public class DiagnosticEquipement {
     public boolean isMaintenanceEffectuee() { return maintenanceEffectuee; }
     public void setMaintenanceEffectuee(boolean maintenanceEffectuee) { this.maintenanceEffectuee = maintenanceEffectuee; }
 }
+
