@@ -12,4 +12,6 @@
         List<Utilisateur> findByVilleCentre(Utilisateur.VilleCentre villeCentre);
         List<Utilisateur> findByRoleAndVilleCentre(Utilisateur.Role role, Utilisateur.VilleCentre villeCentre);
         List<Utilisateur> findByRole(Utilisateur.Role role);
+        List<Utilisateur> findByRoleAndVilleCentreOrRole(Utilisateur.Role role1, Utilisateur.VilleCentre villeCentre, Utilisateur.Role role2);
+
     }

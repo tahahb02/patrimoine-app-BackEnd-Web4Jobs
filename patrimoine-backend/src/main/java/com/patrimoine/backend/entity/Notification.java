@@ -13,7 +13,7 @@ public class Notification {
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
-    private String type; // "FEEDBACK", "SYSTEM", etc.
+    private String type; // "FEEDBACK", "SYSTEM", "DEMANDE", etc.
     private String titre;
     private String message;
     private LocalDateTime dateCreation;
@@ -21,6 +21,7 @@ public class Notification {
     private String link;
     private String equipmentId;
     private String equipmentName;
+    private Long relatedId; // ID de l'entité liée (feedback, demande, etc.)
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -43,4 +44,13 @@ public class Notification {
     public void setEquipmentId(String equipmentId) { this.equipmentId = equipmentId; }
     public String getEquipmentName() { return equipmentName; }
     public void setEquipmentName(String equipmentName) { this.equipmentName = equipmentName; }
+    public Long getRelatedId() { return relatedId; }
+    public void setRelatedId(Long relatedId) { this.relatedId = relatedId; }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.dateCreation == null) {
+            this.dateCreation = LocalDateTime.now();
+        }
+    }
 }
