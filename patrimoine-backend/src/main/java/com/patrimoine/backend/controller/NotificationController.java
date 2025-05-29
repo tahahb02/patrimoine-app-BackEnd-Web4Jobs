@@ -1,9 +1,7 @@
 package com.patrimoine.backend.controller;
 
-import com.patrimoine.backend.entity.Notification;
-import com.patrimoine.backend.entity.Utilisateur;
-import com.patrimoine.backend.repository.NotificationRepository;
-import com.patrimoine.backend.repository.UtilisateurRepository;
+import com.patrimoine.backend.entity.*;
+import com.patrimoine.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +20,9 @@ public class NotificationController {
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private DemandeEquipementRepository demandeEquipementRepository;
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable Long userId) {
@@ -90,38 +91,71 @@ public class NotificationController {
     public ResponseEntity<?> createFeedbackNotification(@RequestBody Map<String, Object> request) {
         try {
             Long userId = Long.parseLong(request.get("userId").toString());
-            String equipmentId = request.get("equipmentId").toString();
-            String equipmentName = request.get("equipmentName").toString();
-            String villeCentre = request.get("villeCentre").toString();
-            Long relatedId = Long.parseLong(request.get("relatedId").toString());
+            Long demandeId = Long.parseLong(request.get("demandeId").toString());
 
-            // Trouver les utilisateurs à notifier (responsables et techniciens du centre)
-            List<Utilisateur> usersToNotify = utilisateurRepository.findByRoleAndVilleCentreOrRole(
-                    Utilisateur.Role.RESPONSABLE,
-                    Utilisateur.VilleCentre.valueOf(villeCentre.replace(" ", "_").toUpperCase()),
-                    Utilisateur.Role.RESPONSABLE_PATRIMOINE
-            );
+            Optional<Utilisateur> userOpt = utilisateurRepository.findById(userId);
+            Optional<DemandeEquipement> demandeOpt = demandeEquipementRepository.findById(demandeId);
 
-            // Créer les notifications
-            usersToNotify.forEach(user -> {
-                Notification notification = new Notification();
-                notification.setUtilisateur(user);
-                notification.setType("FEEDBACK");
-                notification.setTitre("Nouveau feedback reçu");
-                notification.setMessage(String.format(
-                        "Nouveau feedback sur l'équipement %s (%s) dans le centre %s",
-                        equipmentName, equipmentId, villeCentre
-                ));
-                notification.setEquipmentId(equipmentId);
-                notification.setEquipmentName(equipmentName);
-                notification.setRelatedId(relatedId);
-                notification.setLink("/feedback/" + relatedId);
-                notificationRepository.save(notification);
-            });
+            if (userOpt.isEmpty() || demandeOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Utilisateur ou demande non trouvé");
+            }
+
+            DemandeEquipement demande = demandeOpt.get();
+
+            Notification notification = new Notification();
+            notification.setUtilisateur(userOpt.get());
+            notification.setType("FEEDBACK");
+            notification.setTitre("Feedback requis");
+            notification.setMessage(String.format(
+                    "Merci d'évaluer votre utilisation de %s (ID: %s)",
+                    demande.getNomEquipement(), demande.getIdEquipement()
+            ));
+            notification.setDateCreation(LocalDateTime.now());
+            notification.setLue(false);
+            notification.setLink("/FormulaireFeedback/" + demande.getId());
+            notification.setEquipmentId(demande.getIdEquipement());
+            notification.setEquipmentName(demande.getNomEquipement());
+            notification.setRelatedId(demande.getId());
+
+            notificationRepository.save(notification);
 
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erreur lors de la création des notifications: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Erreur: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/create-feedback-notif")
+    public ResponseEntity<?> createFeedbackNotificationSimple(@RequestBody Map<String, Long> request) {
+        try {
+            Long userId = request.get("userId");
+            Long demandeId = request.get("demandeId");
+
+            Utilisateur user = utilisateurRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+            DemandeEquipement demande = demandeEquipementRepository.findById(demandeId)
+                    .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+
+            Notification notification = new Notification();
+            notification.setUtilisateur(user);
+            notification.setType("FEEDBACK");
+            notification.setTitre("Feedback requis");
+            notification.setMessage(String.format(
+                    "Merci d'évaluer l'équipement %s (ID: %s) que vous avez utilisé",
+                    demande.getNomEquipement(), demande.getIdEquipement()
+            ));
+            notification.setDateCreation(LocalDateTime.now());
+            notification.setLue(false);
+            notification.setLink("/FormulaireFeedback/" + demande.getId());
+            notification.setEquipmentId(demande.getIdEquipement());
+            notification.setEquipmentName(demande.getNomEquipement());
+
+            notificationRepository.save(notification);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur: " + e.getMessage());
         }
     }
 
