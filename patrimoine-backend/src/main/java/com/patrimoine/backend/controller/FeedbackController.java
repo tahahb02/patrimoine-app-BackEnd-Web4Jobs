@@ -2,6 +2,7 @@ package com.patrimoine.backend.controller;
 
 import com.patrimoine.backend.entity.*;
 import com.patrimoine.backend.repository.*;
+import com.patrimoine.backend.service.FeedbackAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,9 @@ public class FeedbackController {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private FeedbackAnalysisService feedbackAnalysisService;
 
     @PostMapping
     public ResponseEntity<?> createFeedback(@RequestBody Map<String, Object> request) {
@@ -58,14 +62,14 @@ public class FeedbackController {
             feedback.setRecommander(request.get("recommander").toString());
             feedback.setEmail(request.get("email").toString());
             feedback.setVilleCentre(demandeOpt.get().getVilleCentre());
+            feedback.setDateFeedback(LocalDateTime.now());
 
-            // Créer des notifications pour les responsables
             createNotificationsForFeedback(feedback);
-
-            // Mettre à jour l'équipement si nécessaire
             updateEquipmentBasedOnFeedback(feedback);
 
-            feedbackRepository.save(feedback);
+            Feedback savedFeedback = feedbackRepository.save(feedback);
+            feedbackAnalysisService.analyzeFeedback(savedFeedback);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erreur lors de la création du feedback: " + e.getMessage());
@@ -73,24 +77,20 @@ public class FeedbackController {
     }
 
     private void createNotificationsForFeedback(Feedback feedback) {
-        // Notification pour le responsable du centre
         List<Utilisateur> responsables = utilisateurRepository.findByRoleAndVilleCentre(
                 Utilisateur.Role.RESPONSABLE,
                 Utilisateur.VilleCentre.valueOf(feedback.getVilleCentre().replace(" ", "_").toUpperCase())
         );
 
-        // Notification pour le responsable patrimoine
         List<Utilisateur> responsablesPatrimoine = utilisateurRepository.findByRole(
                 Utilisateur.Role.RESPONSABLE_PATRIMOINE
         );
 
-        // Notification pour les techniciens du centre
         List<Utilisateur> techniciens = utilisateurRepository.findByRoleAndVilleCentre(
                 Utilisateur.Role.TECHNICIEN,
                 Utilisateur.VilleCentre.valueOf(feedback.getVilleCentre().replace(" ", "_").toUpperCase())
         );
 
-        // Créer les notifications
         createNotificationForUsers(responsables, feedback, "Nouveau feedback reçu pour votre centre");
         createNotificationForUsers(responsablesPatrimoine, feedback, "Nouveau feedback reçu");
         createNotificationForUsers(techniciens, feedback, "Nouveau feedback technique reçu");
@@ -118,20 +118,11 @@ public class FeedbackController {
     private void updateEquipmentBasedOnFeedback(Feedback feedback) {
         Optional<Equipment> equipmentOpt = equipmentRepository.findById(Long.parseLong(feedback.getEquipmentId()));
         equipmentOpt.ifPresent(equipment -> {
-            // Mettre à jour le statut si le feedback est négatif
             if (feedback.getSatisfaction() < 3 || feedback.getFiabilite() < 3) {
                 equipment.setStatus("BESOIN_VERIFICATION");
                 equipmentRepository.save(equipment);
-
-                // Créer un diagnostic automatique
-                createDiagnosticForEquipment(equipment, feedback);
             }
         });
-    }
-
-    private void createDiagnosticForEquipment(Equipment equipment, Feedback feedback) {
-        // Implémentation dépend de votre système de diagnostic
-        // ...
     }
 
     @GetMapping("/centre/{villeCentre}")

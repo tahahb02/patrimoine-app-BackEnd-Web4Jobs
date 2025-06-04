@@ -26,6 +26,8 @@ public class DiagnosticEquipement {
     private LocalDateTime dateDiagnostic;
     private boolean besoinMaintenance;
     private boolean maintenanceEffectuee;
+    @Column(name = "automatic_diagnostic", nullable = false, columnDefinition = "boolean default false")
+    private boolean automaticDiagnostic = false; // Valeur par défaut
 
     public enum TypeProbleme {
         MATERIEL,
@@ -65,5 +67,7 @@ public class DiagnosticEquipement {
     public void setBesoinMaintenance(boolean besoinMaintenance) { this.besoinMaintenance = besoinMaintenance; }
     public boolean isMaintenanceEffectuee() { return maintenanceEffectuee; }
     public void setMaintenanceEffectuee(boolean maintenanceEffectuee) { this.maintenanceEffectuee = maintenanceEffectuee; }
+    public boolean isAutomaticDiagnostic() {return automaticDiagnostic;}
+    public void setAutomaticDiagnostic(boolean automaticDiagnostic) {this.automaticDiagnostic = automaticDiagnostic;}
 }
 

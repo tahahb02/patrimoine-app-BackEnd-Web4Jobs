@@ -89,4 +89,8 @@ public class DiagnosticEquipementService {
             diagnosticEquipementRepository.save(diagnostic);
         });
     }
+
+    public DiagnosticEquipement saveDiagnostic(DiagnosticEquipement diagnostic) {
+        return diagnosticEquipementRepository.save(diagnostic);
+    }
 }
