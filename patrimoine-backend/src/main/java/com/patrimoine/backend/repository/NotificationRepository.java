@@ -5,43 +5,52 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    // Trouver les notifications par utilisateur triées par date
     List<Notification> findByUtilisateurIdOrderByDateCreationDesc(Long userId);
 
-    // Trouver les notifications non lues par utilisateur
+    @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :userId AND n.type IN :types ORDER BY n.dateCreation DESC")
+    List<Notification> findByUtilisateurIdAndTypeInOrderByDateCreationDesc(
+            @Param("userId") Long userId,
+            @Param("types") List<String> types);
+
+    @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :userId AND n.type = :type ORDER BY n.dateCreation DESC")
+    List<Notification> findByUtilisateurIdAndTypeOrderByDateCreationDesc(
+            @Param("userId") Long userId,
+            @Param("type") String type);
+
     List<Notification> findByUtilisateurIdAndLueFalseOrderByDateCreationDesc(Long userId);
 
-    // Trouver les notifications par type
-    List<Notification> findByTypeOrderByDateCreationDesc(String type);
+    @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :userId AND n.lue = false AND n.type IN :types ORDER BY n.dateCreation DESC")
+    List<Notification> findByUtilisateurIdAndLueFalseAndTypeInOrderByDateCreationDesc(
+            @Param("userId") Long userId,
+            @Param("types") List<String> types);
 
-    // Trouver les notifications par équipement
-    List<Notification> findByEquipmentIdOrderByDateCreationDesc(String equipmentId);
+    @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :userId AND n.lue = false AND n.type = :type ORDER BY n.dateCreation DESC")
+    List<Notification> findByUtilisateurIdAndLueFalseAndTypeOrderByDateCreationDesc(
+            @Param("userId") Long userId,
+            @Param("type") String type);
 
-    // Trouver une notification par son lien
     Optional<Notification> findByLink(String link);
 
-    // Trouver les notifications par ID lié
-    List<Notification> findByRelatedId(Long relatedId);
-
-    // Marquer toutes les notifications d'un utilisateur comme lues
     @Modifying
     @Query("UPDATE Notification n SET n.lue = true WHERE n.utilisateur.id = :userId AND n.lue = false")
     void markAllAsReadByUser(@Param("userId") Long userId);
 
-    // Compter les notifications non lues par utilisateur
     @Query("SELECT COUNT(n) FROM Notification n WHERE n.utilisateur.id = :userId AND n.lue = false")
     long countUnreadByUser(@Param("userId") Long userId);
 
-    // Trouver les notifications par centre
-    @Query("SELECT n FROM Notification n WHERE n.utilisateur.villeCentre = :villeCentre ORDER BY n.dateCreation DESC")
-    List<Notification> findByVilleCentre(@Param("villeCentre") String villeCentre);
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.utilisateur.id = :userId AND n.lue = false AND n.type IN :types")
+    long countUnreadByUserAndTypeIn(
+            @Param("userId") Long userId,
+            @Param("types") List<String> types);
 
-    // Trouver les feedbacks récents pour un équipement
-    @Query("SELECT n FROM Notification n WHERE n.type = 'FEEDBACK' AND n.equipmentId = :equipmentId ORDER BY n.dateCreation DESC")
-    List<Notification> findFeedbackNotificationsForEquipment(@Param("equipmentId") String equipmentId);
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.utilisateur.id = :userId AND n.lue = false AND n.type = :type")
+    long countUnreadByUserAndType(
+            @Param("userId") Long userId,
+            @Param("type") String type);
 }

@@ -13,7 +13,11 @@ public class Notification {
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
-    private String type; // "FEEDBACK", "SYSTEM", "DEMANDE", etc.
+    @ManyToOne
+    @JoinColumn(name = "demande_id")
+    private DemandeEquipement demande;
+
+    private String type; // "FEEDBACK", "DEMANDE", "REPONSE"
     private String titre;
     private String message;
     private LocalDateTime dateCreation;
@@ -21,13 +25,20 @@ public class Notification {
     private String link;
     private String equipmentId;
     private String equipmentName;
-    private Long relatedId; // ID de l'entité liée (feedback, demande, etc.)
+    private Long relatedId;
+
+    // Nouveaux champs
+    private String demandeurNom;
+    private String demandeurPrenom;
+    private String statutDemande;
 
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Utilisateur getUtilisateur() { return utilisateur; }
     public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
+    public DemandeEquipement getDemande() { return demande; }
+    public void setDemande(DemandeEquipement demande) { this.demande = demande; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
     public String getTitre() { return titre; }
@@ -46,6 +57,12 @@ public class Notification {
     public void setEquipmentName(String equipmentName) { this.equipmentName = equipmentName; }
     public Long getRelatedId() { return relatedId; }
     public void setRelatedId(Long relatedId) { this.relatedId = relatedId; }
+    public String getDemandeurNom() { return demandeurNom; }
+    public void setDemandeurNom(String demandeurNom) { this.demandeurNom = demandeurNom; }
+    public String getDemandeurPrenom() { return demandeurPrenom; }
+    public void setDemandeurPrenom(String demandeurPrenom) { this.demandeurPrenom = demandeurPrenom; }
+    public String getStatutDemande() { return statutDemande; }
+    public void setStatutDemande(String statutDemande) { this.statutDemande = statutDemande; }
 
     @PrePersist
     public void prePersist() {

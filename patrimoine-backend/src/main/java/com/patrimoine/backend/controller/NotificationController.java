@@ -5,10 +5,10 @@ import com.patrimoine.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -26,13 +26,55 @@ public class NotificationController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable Long userId) {
-        List<Notification> notifications = notificationRepository.findByUtilisateurIdOrderByDateCreationDesc(userId);
+        // Récupérer le rôle de l'utilisateur
+        Utilisateur utilisateur = utilisateurRepository.findById(userId).orElse(null);
+        if (utilisateur == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Notification> notifications;
+        if (utilisateur.getRole() == Utilisateur.Role.ADHERANT) {
+            // Adhérent voit seulement les feedbacks et réponses
+            notifications = notificationRepository.findByUtilisateurIdAndTypeInOrderByDateCreationDesc(
+                    userId,
+                    List.of("FEEDBACK", "REPONSE")
+            );
+        } else if (utilisateur.getRole() == Utilisateur.Role.RESPONSABLE) {
+            // Responsable voit seulement les demandes
+            notifications = notificationRepository.findByUtilisateurIdAndTypeOrderByDateCreationDesc(
+                    userId,
+                    "DEMANDE"
+            );
+        } else {
+            // Autres rôles voient tout
+            notifications = notificationRepository.findByUtilisateurIdOrderByDateCreationDesc(userId);
+        }
+
         return ResponseEntity.ok(notifications);
     }
 
     @GetMapping("/user/{userId}/unread")
     public ResponseEntity<List<Notification>> getUnreadUserNotifications(@PathVariable Long userId) {
-        List<Notification> notifications = notificationRepository.findByUtilisateurIdAndLueFalseOrderByDateCreationDesc(userId);
+        Utilisateur utilisateur = utilisateurRepository.findById(userId).orElse(null);
+        if (utilisateur == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Notification> notifications;
+        if (utilisateur.getRole() == Utilisateur.Role.ADHERANT) {
+            notifications = notificationRepository.findByUtilisateurIdAndLueFalseAndTypeInOrderByDateCreationDesc(
+                    userId,
+                    List.of("FEEDBACK", "REPONSE")
+            );
+        } else if (utilisateur.getRole() == Utilisateur.Role.RESPONSABLE) {
+            notifications = notificationRepository.findByUtilisateurIdAndLueFalseAndTypeOrderByDateCreationDesc(
+                    userId,
+                    "DEMANDE"
+            );
+        } else {
+            notifications = notificationRepository.findByUtilisateurIdAndLueFalseOrderByDateCreationDesc(userId);
+        }
+
         return ResponseEntity.ok(notifications);
     }
 
@@ -69,22 +111,112 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/feedback/{equipmentId}")
-    public ResponseEntity<List<Notification>> getFeedbackNotificationsForEquipment(@PathVariable String equipmentId) {
-        List<Notification> notifications = notificationRepository.findFeedbackNotificationsForEquipment(equipmentId);
-        return ResponseEntity.ok(notifications);
-    }
-
-    @GetMapping("/centre/{villeCentre}")
-    public ResponseEntity<List<Notification>> getNotificationsByCentre(@PathVariable String villeCentre) {
-        List<Notification> notifications = notificationRepository.findByVilleCentre(villeCentre);
-        return ResponseEntity.ok(notifications);
-    }
-
     @GetMapping("/count/user/{userId}/unread")
     public ResponseEntity<Long> countUnreadNotifications(@PathVariable Long userId) {
-        long count = notificationRepository.countUnreadByUser(userId);
+        Utilisateur utilisateur = utilisateurRepository.findById(userId).orElse(null);
+        if (utilisateur == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        long count;
+        if (utilisateur.getRole() == Utilisateur.Role.ADHERANT) {
+            count = notificationRepository.countUnreadByUserAndTypeIn(
+                    userId,
+                    List.of("FEEDBACK", "REPONSE")
+            );
+        } else if (utilisateur.getRole() == Utilisateur.Role.RESPONSABLE) {
+            count = notificationRepository.countUnreadByUserAndType(
+                    userId,
+                    "DEMANDE"
+            );
+        } else {
+            count = notificationRepository.countUnreadByUser(userId);
+        }
+
         return ResponseEntity.ok(count);
+    }
+
+    @PostMapping("/create-demande-notification")
+    public ResponseEntity<?> createDemandeNotification(@RequestBody Map<String, Long> request) {
+        try {
+            Long demandeId = request.get("demandeId");
+            DemandeEquipement demande = demandeEquipementRepository.findById(demandeId)
+                    .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+
+            // Trouver les responsables du centre concerné
+            List<Utilisateur> responsables = utilisateurRepository.findByRoleAndVilleCentre(
+                    Utilisateur.Role.RESPONSABLE,
+                    demande.getUtilisateur().getVilleCentre()
+            );
+
+            // Créer une notification pour chaque responsable
+            for (Utilisateur responsable : responsables) {
+                Notification notification = new Notification();
+                notification.setUtilisateur(responsable);
+                notification.setDemande(demande);
+                notification.setType("DEMANDE");
+                notification.setTitre("Nouvelle demande d'équipement");
+                notification.setMessage(String.format(
+                        "Nouvelle demande pour l'équipement %s par %s %s",
+                        demande.getNomEquipement(),
+                        demande.getUtilisateur().getPrenom(),
+                        demande.getUtilisateur().getNom()
+                ));
+                notification.setDateCreation(LocalDateTime.now());
+                notification.setLue(false);
+                notification.setLink("/demandes/" + demande.getId());
+                notification.setEquipmentId(demande.getIdEquipement());
+                notification.setEquipmentName(demande.getNomEquipement());
+                notification.setRelatedId(demande.getId());
+                notification.setDemandeurNom(demande.getUtilisateur().getNom());
+                notification.setDemandeurPrenom(demande.getUtilisateur().getPrenom());
+                notification.setStatutDemande("EN_ATTENTE");
+
+                notificationRepository.save(notification);
+            }
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/create-reponse-notification")
+    public ResponseEntity<?> createReponseNotification(@RequestBody Map<String, Object> request) {
+        try {
+            Long demandeId = Long.parseLong(request.get("demandeId").toString());
+            String statut = request.get("statut").toString();
+            String commentaire = request.get("commentaire").toString();
+
+            DemandeEquipement demande = demandeEquipementRepository.findById(demandeId)
+                    .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+
+            // Créer une notification pour l'adhérent
+            Notification notification = new Notification();
+            notification.setUtilisateur(demande.getUtilisateur());
+            notification.setDemande(demande);
+            notification.setType("REPONSE");
+            notification.setTitre("Réponse à votre demande");
+            notification.setMessage(String.format(
+                    "Votre demande pour %s a été %s. %s",
+                    demande.getNomEquipement(),
+                    statut.equals("ACCEPTEE") ? "acceptée" : "refusée",
+                    commentaire != null && !commentaire.isEmpty() ? "Commentaire: " + commentaire : ""
+            ));
+            notification.setDateCreation(LocalDateTime.now());
+            notification.setLue(false);
+            notification.setLink("/demandes/" + demande.getId());
+            notification.setEquipmentId(demande.getIdEquipement());
+            notification.setEquipmentName(demande.getNomEquipement());
+            notification.setRelatedId(demande.getId());
+            notification.setStatutDemande(statut);
+
+            notificationRepository.save(notification);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erreur: " + e.getMessage());
+        }
     }
 
     @PostMapping("/feedback")
@@ -104,6 +236,7 @@ public class NotificationController {
 
             Notification notification = new Notification();
             notification.setUtilisateur(userOpt.get());
+            notification.setDemande(demande);
             notification.setType("FEEDBACK");
             notification.setTitre("Feedback requis");
             notification.setMessage(String.format(
@@ -139,6 +272,7 @@ public class NotificationController {
 
             Notification notification = new Notification();
             notification.setUtilisateur(user);
+            notification.setDemande(demande);
             notification.setType("FEEDBACK");
             notification.setTitre("Feedback requis");
             notification.setMessage(String.format(

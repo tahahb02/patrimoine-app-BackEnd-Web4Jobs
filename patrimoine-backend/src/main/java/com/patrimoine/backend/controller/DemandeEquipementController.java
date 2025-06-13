@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,9 @@ public class DemandeEquipementController {
 
     @Autowired
     private DemandeEquipementRepository demandeEquipementRepository;
+
+    @Autowired
+    private NotificationController notificationController;
 
     @GetMapping("/en-attente/{villeCentre}")
     public ResponseEntity<List<DemandeEquipement>> getDemandesEnAttenteByVilleCentre(
@@ -135,6 +139,13 @@ public class DemandeEquipementController {
             } else {
                 updated = demandeEquipementService.mettreAJourStatut(id, statut, commentaire, userCenter);
             }
+
+            // Créer une notification de réponse pour l'adhérent
+            Map<String, Object> notifRequest = new HashMap<>();
+            notifRequest.put("demandeId", id);
+            notifRequest.put("statut", statut);
+            notifRequest.put("commentaire", commentaire);
+            notificationController.createReponseNotification(notifRequest);
 
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
@@ -263,6 +274,12 @@ public class DemandeEquipementController {
             demande.setStatut("EN_ATTENTE");
 
             DemandeEquipement savedDemande = demandeEquipementService.creerDemande(demande);
+
+            // Créer une notification pour les responsables
+            Map<String, Long> request = new HashMap<>();
+            request.put("demandeId", savedDemande.getId());
+            notificationController.createDemandeNotification(request);
+
             return ResponseEntity.ok(savedDemande);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -274,7 +291,6 @@ public class DemandeEquipementController {
             @PathVariable Long userId,
             @RequestHeader("Authorization") String token) {
 
-        // Vérification du token et des autorisations
         try {
             List<DemandeEquipement> demandes = demandeEquipementService.getDemandesByUtilisateur(userId);
             return ResponseEntity.ok(demandes);
@@ -282,7 +298,7 @@ public class DemandeEquipementController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    // Ajoutez cette nouvelle méthode
+
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<List<DemandeEquipement>> getDemandesByUser(
             @PathVariable Long userId,
@@ -307,6 +323,4 @@ public class DemandeEquipementController {
         List<DemandeEquipement> demandes = demandeEquipementRepository.findAllByOrderByDateDemandeDesc();
         return ResponseEntity.ok(demandes);
     }
-
-
 }
