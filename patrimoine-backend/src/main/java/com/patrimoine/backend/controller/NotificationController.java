@@ -140,20 +140,21 @@ public class NotificationController {
     public ResponseEntity<?> createDemandeNotification(@RequestBody Map<String, Long> request) {
         try {
             Long demandeId = request.get("demandeId");
-            DemandeEquipement demande = demandeEquipementRepository.findById(demandeId)
+
+            // Charger la demande avec l'utilisateur (en utilisant FETCH JOIN)
+            DemandeEquipement demande = demandeEquipementRepository.findByIdWithUtilisateur(demandeId)
                     .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
 
-            // Debug: Ajoutez un log pour vérifier le centre de la demande
-            System.out.println("Centre de la demande: " + demande.getVilleCentre());
+            // Vérifier que l'utilisateur est bien chargé
+            if (demande.getUtilisateur() == null) {
+                throw new RuntimeException("Utilisateur non trouvé pour la demande");
+            }
 
             // Trouver les responsables du centre concerné
             List<Utilisateur> responsables = utilisateurRepository.findByRoleAndVilleCentre(
                     Utilisateur.Role.RESPONSABLE,
                     Utilisateur.VilleCentre.valueOf(demande.getVilleCentre().replace(" ", "_").toUpperCase())
             );
-
-            // Debug: Ajoutez un log pour vérifier les responsables trouvés
-            System.out.println("Nombre de responsables trouvés: " + responsables.size());
 
             // Créer une notification pour chaque responsable
             for (Utilisateur responsable : responsables) {
@@ -162,31 +163,33 @@ public class NotificationController {
                 notification.setDemande(demande);
                 notification.setType("DEMANDE");
                 notification.setTitre("Nouvelle demande d'équipement");
+
+                // Utiliser directement les champs nom et prenom de la demande
+                String nomDemandeur = demande.getNom() != null ? demande.getNom() : demande.getUtilisateur().getNom();
+                String prenomDemandeur = demande.getPrenom() != null ? demande.getPrenom() : demande.getUtilisateur().getPrenom();
+
                 notification.setMessage(String.format(
                         "Nouvelle demande pour l'équipement %s par %s %s",
                         demande.getNomEquipement(),
-                        demande.getUtilisateur().getPrenom(),
-                        demande.getUtilisateur().getNom()
+                        prenomDemandeur,
+                        nomDemandeur
                 ));
+
                 notification.setDateCreation(LocalDateTime.now());
                 notification.setLue(false);
                 notification.setLink("/demandes/" + demande.getId());
                 notification.setEquipmentId(demande.getIdEquipement());
                 notification.setEquipmentName(demande.getNomEquipement());
                 notification.setRelatedId(demande.getId());
-                notification.setDemandeurNom(demande.getUtilisateur().getNom());
-                notification.setDemandeurPrenom(demande.getUtilisateur().getPrenom());
+                notification.setDemandeurNom(nomDemandeur);
+                notification.setDemandeurPrenom(prenomDemandeur);
                 notification.setStatutDemande("EN_ATTENTE");
 
                 notificationRepository.save(notification);
-
-                // Debug: Ajoutez un log pour chaque notification créée
-                System.out.println("Notification créée pour: " + responsable.getEmail());
             }
 
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            // Debug: Log l'erreur complète
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Erreur: " + e.getMessage());
         }

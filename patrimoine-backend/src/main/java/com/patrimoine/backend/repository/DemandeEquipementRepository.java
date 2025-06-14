@@ -7,6 +7,7 @@
     import org.springframework.data.repository.query.Param;
     import java.time.LocalDateTime;
     import java.util.List;
+    import java.util.Optional;
 
     public interface DemandeEquipementRepository extends JpaRepository<DemandeEquipement, Long> {
 
@@ -16,6 +17,8 @@
         List<DemandeEquipement> findByStatutNot(String statut);
         List<DemandeEquipement> findByStatutNotAndVilleCentre(String statut, String villeCentre);
         List<DemandeEquipement> findByNomEquipementAndStatut(String nomEquipement, String statut);
+        @Query("SELECT d FROM DemandeEquipement d LEFT JOIN FETCH d.utilisateur WHERE d.id = :id")
+        Optional<DemandeEquipement> findByIdWithUtilisateur(@Param("id") Long id);
 
         @Query("SELECT d FROM DemandeEquipement d WHERE d.urgence = 'ELEVEE' AND d.villeCentre = :villeCentre")
         List<DemandeEquipement> findDemandesUrgentesByVilleCentre(@Param("villeCentre") String villeCentre);
