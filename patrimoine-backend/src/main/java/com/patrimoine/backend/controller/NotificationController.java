@@ -143,11 +143,17 @@ public class NotificationController {
             DemandeEquipement demande = demandeEquipementRepository.findById(demandeId)
                     .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
 
+            // Debug: Ajoutez un log pour vérifier le centre de la demande
+            System.out.println("Centre de la demande: " + demande.getVilleCentre());
+
             // Trouver les responsables du centre concerné
             List<Utilisateur> responsables = utilisateurRepository.findByRoleAndVilleCentre(
                     Utilisateur.Role.RESPONSABLE,
-                    demande.getUtilisateur().getVilleCentre()
+                    Utilisateur.VilleCentre.valueOf(demande.getVilleCentre().replace(" ", "_").toUpperCase())
             );
+
+            // Debug: Ajoutez un log pour vérifier les responsables trouvés
+            System.out.println("Nombre de responsables trouvés: " + responsables.size());
 
             // Créer une notification pour chaque responsable
             for (Utilisateur responsable : responsables) {
@@ -173,10 +179,15 @@ public class NotificationController {
                 notification.setStatutDemande("EN_ATTENTE");
 
                 notificationRepository.save(notification);
+
+                // Debug: Ajoutez un log pour chaque notification créée
+                System.out.println("Notification créée pour: " + responsable.getEmail());
             }
 
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            // Debug: Log l'erreur complète
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Erreur: " + e.getMessage());
         }
     }

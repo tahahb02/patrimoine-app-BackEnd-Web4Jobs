@@ -22,7 +22,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByUtilisateurIdAndTypeOrderByDateCreationDesc(
             @Param("userId") Long userId,
             @Param("type") String type);
-
     List<Notification> findByUtilisateurIdAndLueFalseOrderByDateCreationDesc(Long userId);
 
     @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :userId AND n.lue = false AND n.type IN :types ORDER BY n.dateCreation DESC")
