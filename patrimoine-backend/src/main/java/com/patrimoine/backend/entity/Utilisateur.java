@@ -3,6 +3,8 @@ package com.patrimoine.backend.entity;
 import jakarta.persistence.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "utilisateur")
 public class Utilisateur {
@@ -16,6 +18,7 @@ public class Utilisateur {
     private String password;
     private String phone;
     private String city;
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ville_centre")
@@ -77,6 +80,8 @@ public class Utilisateur {
     public void setRole(Role role) { this.role = role; }
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
+    public LocalDateTime getCreatedAt() {return createdAt;}
+    public void setCreatedAt(LocalDateTime createdAt) {this.createdAt = createdAt;}
 
     public void encodePassword() {
         if (this.password != null && !this.password.isEmpty() && !this.password.startsWith("$2a$")) {
