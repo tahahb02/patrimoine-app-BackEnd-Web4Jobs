@@ -60,4 +60,7 @@
 
         @Query("SELECT d FROM DemandeEquipement d ORDER BY d.dateDemande DESC")
         List<DemandeEquipement> findAllByOrderByDateDemandeDesc();
+
+        @Query("SELECT COUNT(d) FROM DemandeEquipement d WHERE d.statut = :statut")
+        long countByStatut(@Param("statut") String statut);
     }

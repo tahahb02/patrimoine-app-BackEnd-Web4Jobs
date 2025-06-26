@@ -1,7 +1,7 @@
-    package com.patrimoine.backend.entity;
-    import jakarta.persistence.Entity;
+        package com.patrimoine.backend.entity;
+        import jakarta.persistence.Entity;
 
 
-    @Entity
-    public class Admin extends Utilisateur{
-    }
+        @Entity
+        public class Admin extends Utilisateur{
+        }
