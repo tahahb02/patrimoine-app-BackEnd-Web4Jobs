@@ -184,4 +184,18 @@ public class EquipmentService {
         }
         return equipment;
     }
+
+    public List<Equipment> getAllEquipmentsForDirector() {
+        return equipmentRepository.findAll().stream()
+                .map(equip -> {
+                    if (equip.isEnMaintenance() == null) {
+                        equip.setEnMaintenance(false);
+                    }
+                    if (equip.getStatus() == null) {
+                        equip.setStatus("Disponible");
+                    }
+                    return equip;
+                })
+                .collect(Collectors.toList());
+    }
 }

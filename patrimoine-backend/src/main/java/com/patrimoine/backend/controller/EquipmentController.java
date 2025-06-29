@@ -212,4 +212,17 @@
             List<Equipment> equipments = equipmentService.getEquipementsEnMaintenanceByCentre(userCenter);
             return ResponseEntity.ok(equipments);
         }
+
+        @GetMapping("/directeur/all")
+        public ResponseEntity<List<Equipment>> getAllEquipmentsForDirector(
+                @RequestHeader("X-User-Role") String userRole) {
+
+            if (!"DIRECTEUR".equals(userRole)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            List<Equipment> equipments = equipmentService.getAllEquipmentsForDirector();
+            return ResponseEntity.ok(equipments);
+        }
+
     }
