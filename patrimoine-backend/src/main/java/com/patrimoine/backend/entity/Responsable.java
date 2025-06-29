@@ -1,7 +1,7 @@
-package com.patrimoine.backend.entity;
+    package com.patrimoine.backend.entity;
 
-import jakarta.persistence.Entity;
+    import jakarta.persistence.Entity;
 
-@Entity
-public class Responsable extends Utilisateur{
-}
+    @Entity
+    public class Responsable extends Utilisateur{
+    }
