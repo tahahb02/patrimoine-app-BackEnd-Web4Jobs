@@ -7,6 +7,7 @@
     import org.springframework.web.bind.annotation.*;
 
     import java.util.List;
+    import java.util.Map;
     import java.util.Optional;
 
     @RestController
@@ -223,6 +224,19 @@
 
             List<Equipment> equipments = equipmentService.getAllEquipmentsForDirector();
             return ResponseEntity.ok(equipments);
+        }
+
+        @GetMapping("/directeur/historique/{equipmentId}")
+        public ResponseEntity<Map<String, Object>> getEquipmentHistoryForDirector(
+                @PathVariable Long equipmentId,
+                @RequestHeader("X-User-Role") String userRole) {
+
+            if (!"DIRECTEUR".equals(userRole)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            Map<String, Object> history = equipmentService.getEquipmentHistoryForDirector(equipmentId);
+            return ResponseEntity.ok(history);
         }
 
     }

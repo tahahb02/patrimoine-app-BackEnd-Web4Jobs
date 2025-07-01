@@ -198,4 +198,45 @@ public class EquipmentService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public Map<String, Object> getEquipmentHistoryForDirector(Long equipmentId) {
+        Optional<Equipment> equipmentOpt = equipmentRepository.findById(equipmentId);
+        if (equipmentOpt.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Equipment equipment = equipmentOpt.get();
+        List<DemandeEquipement> demandes = demandeEquipementRepository.findByNomEquipementAndStatut(equipment.getName(), "RETOURNEE");
+
+        Map<String, Object> history = new HashMap<>();
+        List<Map<String, Object>> utilisations = new ArrayList<>();
+        long totalHeures = 0;
+
+        for (DemandeEquipement demande : demandes) {
+            Map<String, Object> utilisation = new HashMap<>();
+            Utilisateur user = demande.getUtilisateur();
+
+            utilisation.put("nom", user.getNom());
+            utilisation.put("prenom", user.getPrenom());
+            utilisation.put("email", user.getEmail());
+            utilisation.put("telephone", user.getPhone());
+            utilisation.put("villeCentre", demande.getVilleCentre());
+
+            long duree = demande.getDureeUtilisation() != null ? demande.getDureeUtilisation() : 0;
+            utilisation.put("heuresUtilisation", duree);
+            totalHeures += duree;
+
+            utilisations.add(utilisation);
+        }
+
+        history.put("equipmentId", equipment.getId());
+        history.put("equipmentName", equipment.getName());
+        history.put("villeCentre", equipment.getVilleCentre());
+        history.put("category", equipment.getCategory());
+        history.put("utilisations", utilisations);
+        history.put("totalUtilisations", demandes.size());
+        history.put("totalHeures", totalHeures);
+
+        return history;
+    }
 }

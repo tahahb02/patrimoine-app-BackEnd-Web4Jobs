@@ -328,11 +328,11 @@
         public ResponseEntity<List<DemandeEquipement>> getAllDemandesForDirector(
                 @RequestHeader("X-User-Role") String userRole) {
 
-            if (!"DIRECTEUR".equals(userRole)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
+                if (!"DIRECTEUR".equals(userRole)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
 
-            List<DemandeEquipement> demandes = demandeEquipementRepository.findAllByOrderByDateDemandeDesc();
-            return ResponseEntity.ok(demandes);
+                List<DemandeEquipement> demandes = demandeEquipementRepository.findAllByOrderByDateDemandeDesc();
+                return ResponseEntity.ok(demandes);
         }
     }
