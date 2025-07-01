@@ -199,4 +199,37 @@ public class StatisticsController {
 
         return ResponseEntity.ok(stats);
     }
+
+    @GetMapping("/patrimoine")
+    public ResponseEntity<Map<String, Object>> getPatrimoineStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // User statistics
+        stats.put("totalUsers", utilisateurRepository.count());
+        stats.put("totalRP", utilisateurRepository.countByRole(Utilisateur.Role.RESPONSABLE_PATRIMOINE));
+
+        // Equipment statistics
+        stats.put("totalEquipments", equipmentRepository.count());
+        stats.put("validatedEquipments", equipmentRepository.countByValidatedTrue());
+        stats.put("pendingValidation", equipmentRepository.countByValidatedFalse());
+
+        // Equipment status
+        Map<String, Long> equipmentStatus = new HashMap<>();
+        equipmentStatus.put("available", equipmentRepository.countByStatus("Disponible"));
+        equipmentStatus.put("onLoan", demandeEquipementRepository.countByStatut("ACCEPTEE"));
+        equipmentStatus.put("maintenance", equipmentRepository.countByEnMaintenance(true));
+        stats.put("equipmentStatus", equipmentStatus);
+
+        // Maintenance statistics
+        Map<String, Long> maintenanceStats = new HashMap<>();
+        maintenanceStats.put("inProgress", maintenanceEquipementRepository.countByTermine(false));
+        maintenanceStats.put("completed", maintenanceEquipementRepository.countByTermine(true));
+        maintenanceStats.put("planned", diagnosticEquipementRepository.countByBesoinMaintenance(true));
+        stats.put("maintenanceStats", maintenanceStats);
+
+        // Fixed centers count
+        stats.put("centersCount", Utilisateur.VilleCentre.values().length);
+
+        return ResponseEntity.ok(stats);
+    }
 }
