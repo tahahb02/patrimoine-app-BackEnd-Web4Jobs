@@ -93,4 +93,8 @@ public class DiagnosticEquipementService {
     public DiagnosticEquipement saveDiagnostic(DiagnosticEquipement diagnostic) {
         return diagnosticEquipementRepository.save(diagnostic);
     }
+
+    public List<DiagnosticEquipement> getAllDiagnostics() {
+        return diagnosticEquipementRepository.findAll();
+    }
 }

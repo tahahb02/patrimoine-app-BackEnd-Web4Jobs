@@ -1,9 +1,9 @@
-
 package com.patrimoine.backend.controller;
 
 import com.patrimoine.backend.entity.DiagnosticEquipement;
 import com.patrimoine.backend.service.DiagnosticEquipementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/diagnostics")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", maxAge = 3600)
 public class DiagnosticEquipementController {
 
     @Autowired
@@ -25,11 +25,11 @@ public class DiagnosticEquipementController {
             @RequestHeader("X-User-Center") String userCenter) {
 
         if (!"TECHNICIEN".equals(userRole)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         if (!villeCentre.equals(userCenter)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         List<DiagnosticEquipement> diagnostics = diagnosticService.getDiagnosticsByVilleCentre(villeCentre);
@@ -43,15 +43,39 @@ public class DiagnosticEquipementController {
             @RequestHeader("X-User-Center") String userCenter) {
 
         if (!"TECHNICIEN".equals(userRole) && !"RESPONSABLE_PATRIMOINE".equals(userRole)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         if (!villeCentre.equals(userCenter)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         List<DiagnosticEquipement> diagnostics = diagnosticService.getDiagnosticsBesoinMaintenance(villeCentre);
         return ResponseEntity.ok(diagnostics);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllDiagnostics(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+
+        System.out.println("Requête GET /api/diagnostics/all reçue");
+        System.out.println("Rôle utilisateur: " + userRole);
+
+        // Temporairement désactivé pour le debug
+        // if (!"DIRECTEUR".equals(userRole)) {
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès réservé aux directeurs");
+        // }
+
+        try {
+            List<DiagnosticEquipement> diagnostics = diagnosticService.getAllDiagnostics();
+            System.out.println("Nombre de diagnostics trouvés: " + diagnostics.size());
+            return ResponseEntity.ok(diagnostics);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la récupération des diagnostics: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur serveur: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}/evaluation")
@@ -61,7 +85,7 @@ public class DiagnosticEquipementController {
             @RequestHeader("X-User-Role") String userRole) {
 
         if (!"TECHNICIEN".equals(userRole)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         boolean besoinMaintenance = Boolean.parseBoolean(request.get("besoinMaintenance"));
@@ -82,7 +106,7 @@ public class DiagnosticEquipementController {
             @RequestHeader("X-User-Role") String userRole) {
 
         if (!"TECHNICIEN".equals(userRole)) {
-            return ResponseEntity.status(403).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         diagnosticService.marquerMaintenanceEffectuee(id);
