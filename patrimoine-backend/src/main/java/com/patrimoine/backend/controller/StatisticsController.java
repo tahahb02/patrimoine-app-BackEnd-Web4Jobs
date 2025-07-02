@@ -8,6 +8,7 @@ import com.patrimoine.backend.repository.DiagnosticEquipementRepository;
 import com.patrimoine.backend.repository.MaintenanceEquipementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -201,35 +202,53 @@ public class StatisticsController {
     }
 
     @GetMapping("/patrimoine")
-    public ResponseEntity<Map<String, Object>> getPatrimoineStatistics() {
-        Map<String, Object> stats = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> getPatrimoineStatistics(
+            @RequestHeader("X-User-Role") String userRole) {
 
-        // User statistics
-        stats.put("totalUsers", utilisateurRepository.count());
-        stats.put("totalRP", utilisateurRepository.countByRole(Utilisateur.Role.RESPONSABLE_PATRIMOINE));
+        // Debug log
+        System.out.println("Accessing /patrimoine with role: " + userRole);
 
-        // Equipment statistics
-        stats.put("totalEquipments", equipmentRepository.count());
-        stats.put("validatedEquipments", equipmentRepository.countByValidatedTrue());
-        stats.put("pendingValidation", equipmentRepository.countByValidatedFalse());
+        if (!"RESPONSABLE_PATRIMOINE".equals(userRole)) {
+            System.out.println("Access denied for role: " + userRole);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-        // Equipment status
-        Map<String, Long> equipmentStatus = new HashMap<>();
-        equipmentStatus.put("available", equipmentRepository.countByStatus("Disponible"));
-        equipmentStatus.put("onLoan", demandeEquipementRepository.countByStatut("ACCEPTEE"));
-        equipmentStatus.put("maintenance", equipmentRepository.countByEnMaintenance(true));
-        stats.put("equipmentStatus", equipmentStatus);
+        try {
+            Map<String, Object> stats = new HashMap<>();
 
-        // Maintenance statistics
-        Map<String, Long> maintenanceStats = new HashMap<>();
-        maintenanceStats.put("inProgress", maintenanceEquipementRepository.countByTermine(false));
-        maintenanceStats.put("completed", maintenanceEquipementRepository.countByTermine(true));
-        maintenanceStats.put("planned", diagnosticEquipementRepository.countByBesoinMaintenance(true));
-        stats.put("maintenanceStats", maintenanceStats);
+            // Debug logs
+            System.out.println("Counting equipment...");
+            long totalEquipments = equipmentRepository.count();
+            System.out.println("Total equipments: " + totalEquipments);
 
-        // Fixed centers count
-        stats.put("centersCount", Utilisateur.VilleCentre.values().length);
+            stats.put("totalEquipments", totalEquipments);
+            stats.put("validatedEquipments", equipmentRepository.countByValidatedTrue());
+            stats.put("pendingValidation", equipmentRepository.countByValidatedFalse());
+            stats.put("centersCount", Utilisateur.VilleCentre.values().length);
+            stats.put("totalUsers", utilisateurRepository.count());
+            stats.put("totalRP", utilisateurRepository.countByRole(Utilisateur.Role.RESPONSABLE_PATRIMOINE));
 
-        return ResponseEntity.ok(stats);
+            // Equipment status
+            Map<String, Long> equipmentStatus = new HashMap<>();
+            equipmentStatus.put("available", equipmentRepository.countByStatus("Disponible"));
+            equipmentStatus.put("onLoan", demandeEquipementRepository.countByStatut("ACCEPTEE"));
+            equipmentStatus.put("maintenance", equipmentRepository.countByEnMaintenance(true));
+            stats.put("equipmentStatus", equipmentStatus);
+
+            // Maintenance stats
+            Map<String, Long> maintenanceStats = new HashMap<>();
+            maintenanceStats.put("inProgress", maintenanceEquipementRepository.countByTermine(false));
+            maintenanceStats.put("completed", maintenanceEquipementRepository.countByTermine(true));
+            maintenanceStats.put("planned", diagnosticEquipementRepository.countByBesoinMaintenance(true));
+            stats.put("maintenanceStats", maintenanceStats);
+
+            System.out.println("Statistics prepared: " + stats);
+            return ResponseEntity.ok(stats);
+
+        } catch (Exception e) {
+            System.err.println("Error in getPatrimoineStatistics: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
